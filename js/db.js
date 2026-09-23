@@ -69,8 +69,9 @@ const DB = (() => {
     deleteItem: (id) => rest(`/payment_items?id=eq.${id}`, { method: 'DELETE' }),
 
     // объект целиком: периоды + платежи + статьи + показания
+    // (явные колонки: select=* с вложенным embed вешает PostgREST — зависание запроса)
     loadObjectData: (objectId) => rest(
-      `/periods?object_id=eq.${objectId}&select=*,payments(amount,item_id,payment_items(key,title)),meter_readings(kind,zone,value)&order=sort_key`
+      `/periods?object_id=eq.${objectId}&select=id,year,label,sort_key,payments(amount,item_id,payment_items(key,title)),meter_readings(kind,zone,value)&order=sort_key`
     ),
 
     upsertPeriod: (row) => rest('/periods?on_conflict=object_id,year,label', { method: 'POST', body: row, prefer: 'resolution=merge-duplicates,return=representation' }),
@@ -78,10 +79,9 @@ const DB = (() => {
     upsertReading: (row) => rest('/meter_readings?on_conflict=period_id,kind,zone', { method: 'POST', body: row, prefer: 'resolution=merge-duplicates,return=representation' }),
     deleteReadings: (periodId) => rest(`/meter_readings?period_id=eq.${periodId}`, { method: 'DELETE' }),
 
-    // отчёты
+    // отчёты (итоги считаются по сумме payments; разбивка по статьям не нужна)
     allPeriodsWithPayments: (year) => rest(
-      `/periods?year=eq.${year}&select=year,label,sort_key,object_id,objects(name),payments(amount,item_id,payment_items(key,title))&order=sort_key`
+      `/periods?year=eq.${year}&select=year,label,sort_key,object_id,objects(name),payments(amount)&order=sort_key`
     ),
-    rpcTotalByPeriod: () => rest('/periods?select=id,label,sort_key,object_id,payments(amount)'),
   };
 })();

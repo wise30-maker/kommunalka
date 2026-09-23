@@ -299,48 +299,62 @@ async function renderReports() {
   app.append(el('h1', {}, 'Отчёты'));
   const now = new Date();
   const yearInp = el('input', { type: 'number', inputmode: 'numeric', value: now.getFullYear() });
+  const monthSel = el('select', {});
+  monthSel.append(el('option', { value: '' }, 'Весь год'));
+  MONTHS.forEach((m, i) => monthSel.append(el('option', { value: i + 1 }, m)));
+  const objSel = el('select', {});
+  objSel.append(el('option', { value: '' }, 'Все объекты'));
+  for (const o of state.objects) objSel.append(el('option', { value: o.name }, o.name));
   const go = el('button', { class: 'btn', onclick: showReport, style: 'margin-top:22px' }, 'Показать');
   const out = el('div', {});
-  app.append(el('div', { class: 'card row' }, el('div', {}, el('label', {}, 'Год'), yearInp), go), out);
+  app.append(el('div', { class: 'card' },
+    el('div', { class: 'row' },
+      el('div', {}, el('label', {}, 'Год'), yearInp),
+      el('div', {}, el('label', {}, 'Период'), monthSel),
+      el('div', {}, el('label', {}, 'Объект'), objSel)),
+    go), out);
+
+  const monthOf = (p) => Math.round((p.sort_key - p.year) * 100);
 
   async function showReport() {
     out.innerHTML = '';
     try {
       const y = parseInt(yearInp.value, 10);
-      const periods = await DB.allPeriodsWithPayments(y);
-      // годовые итоги по объектам
+      const mFilter = monthSel.value ? parseInt(monthSel.value, 10) : null;
+      const oFilter = objSel.value;
+      let periods = await DB.allPeriodsWithPayments(y);
+      if (mFilter) periods = periods.filter(p => monthOf(p) === mFilter);
+      if (oFilter) periods = periods.filter(p => p.objects?.name === oFilter);
+
       const byObject = {};
       for (const p of periods) {
         const name = p.objects?.name || '?';
         byObject[name] = (byObject[name] || 0) + periodTotal(p);
       }
       const names = Object.keys(byObject);
-      if (!names.length) { out.append(el('div', { class: 'card muted' }, 'Нет данных за этот год')); return; }
+      const periodName = mFilter ? `${MONTHS[mFilter - 1]} ${y}` : `${y} год`;
+      if (!names.length) { out.append(el('div', { class: 'card muted' }, `Нет данных: ${periodName}`)); return; }
 
       const table = el('table');
-      table.append(el('tr', {}, el('th', {}, 'Объект'), el('th', {}, `Итого за ${y}, ₽`)));
+      table.append(el('tr', {}, el('th', {}, 'Объект'), el('th', {}, `Итого, ₽`)));
       let sum = 0;
       names.forEach(n => { sum += byObject[n]; table.append(el('tr', {}, el('td', {}, n), el('td', {}, fmtMoney(byObject[n])))); });
       table.append(el('tr', { class: 'total' }, el('td', {}, 'Всего'), el('td', {}, fmtMoney(sum))));
-      out.append(el('div', { class: 'card' }, el('h2', {}, `Итоги за ${y} год`), table));
+      out.append(el('div', { class: 'card' }, el('h2', {}, `Итоги: ${periodName}`), table));
 
       const cv = el('canvas', {});
-      out.append(el('div', { class: 'card' }, el('h2', {}, 'По объектам'), cv));
-      drawBars(cv, names, names.map(n => byObject[n]), `Итого за ${y} год, ₽`);
+      out.append(el('div', { class: 'card' }, cv));
+      drawBars(cv, names, names.map(n => byObject[n]), `Итого: ${periodName}, ₽`);
 
-      // динамика по объекту
-      const objSel = el('select', {});
-      names.forEach(n => objSel.append(el('option', { value: n }, n)));
-      const dynCard = el('div', { class: 'card' }, el('h2', {}, 'Динамика по объекту'), objSel, el('canvas', {}));
+      // динамика по объекту (за год, если выбран месяц — только этот месяц по годам нет, берём год)
+      const dynObj = oFilter || names[0];
+      const list = (await DB.allPeriodsWithPayments(y))
+        .filter(p => p.objects?.name === dynObj)
+        .sort((a, b) => a.sort_key - b.sort_key);
+      const labels = list.map(p => p.label.length > 12 ? p.label.slice(0, 11) + '…' : p.label);
+      const dynCard = el('div', { class: 'card' }, el('h2', {}, `Динамика: ${dynObj}`), el('canvas', {}));
       out.append(dynCard);
-      const drawDyn = () => {
-        const name = objSel.value;
-        const list = periods.filter(p => p.objects?.name === name).sort((a, b) => a.sort_key - b.sort_key);
-        const labels = list.map(p => p.label.length > 12 ? p.label.slice(0, 11) + '…' : p.label);
-        drawLine(dynCard.querySelector('canvas'), labels, list.map(periodTotal), `${name}, ${y} год, ₽/месяц`);
-      };
-      objSel.addEventListener('change', drawDyn);
-      drawDyn();
+      drawLine(dynCard.querySelector('canvas'), labels, list.map(periodTotal), `${dynObj}, ${y} год, ₽/месяц`);
     } catch (err) { showError(err); }
   }
 }
