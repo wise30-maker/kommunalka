@@ -17,6 +17,21 @@ def req(method, url, payload=None):
         print("HTTP", e.code, e.read()[:300]); sys.exit(1)
 
 # файлы: отслеживаемые git'ом + локальный js/config.js (в .gitignore, но нужен на сайте)
+# автоматический кэш-бастинг: ?v=<sha8 содержимого файла> в index.html —
+# любое изменение css/js само инвалидирует кэш браузера, руками бампить не нужно
+import hashlib, re
+idx_path = "index.html"
+if os.path.exists(idx_path):
+    html = open(idx_path, encoding="utf-8").read()
+    def bump(m):
+        path = m.group(1)
+        if os.path.exists(path):
+            h = hashlib.sha256(open(path, "rb").read()).hexdigest()[:8]
+            return f"{path}?v={h}"
+        return m.group(0)
+    html = re.sub(r"(css/style\.css|js/[\w.]+)\?v=[^\"']+", bump, html)
+    open(idx_path, "w", encoding="utf-8", newline="\n").write(html)
+
 files = subprocess.check_output(["git", "ls-files"], text=True).split()
 skip_prefixes = (".hermes/",)
 files = [f for f in files if not f.startswith(skip_prefixes)]
