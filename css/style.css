@@ -35,9 +35,18 @@ button.link{background:none;border:none;color:var(--accent);cursor:pointer;font-
 h1{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:0 0 14px}
 h2{font-size:17px;font-weight:600;margin:0 0 10px;letter-spacing:-.01em}
 label{display:block;color:var(--muted);font-size:13px;margin:10px 0 4px;font-weight:500}
-input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border-input);background:var(--input);
+input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border-input);background:var(--input);
   color:var(--fg);font-size:16px;outline:none;transition:border-color .15s}
-input:focus,select:focus{border-color:var(--accent)}
+input:focus{border-color:var(--accent)}
+/* select и кнопка-список объектов — единый стиль (одна рамка, один отступ, одна галочка) */
+select,.drop-btn{
+  width:100%;min-height:43px;padding:10px 34px 10px 12px;border-radius:10px;
+  border:1px solid var(--border-input);background-color:var(--input);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1.5l5 5 5-5' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;
+  color:var(--fg);font-size:16px;font-family:inherit;outline:none;cursor:pointer;
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;transition:border-color .15s}
+select:focus,.drop-btn:focus{border-color:var(--accent)}
 input[type=checkbox]{width:19px;height:19px;transform:none;margin-right:9px;accent-color:var(--accent)}
 input[type=number]{-moz-appearance:textfield}
 .btn{display:inline-block;background:var(--accent);color:var(--accent-fg);border:none;border-radius:10px;
@@ -71,11 +80,7 @@ canvas{width:100%;background:var(--card);border-radius:12px;touch-action:pan-y}
 .item-row input{flex:1}
 /* выпадающий список с галочками (отчёты) — визуально как обычный select */
 .drop-wrap{position:relative}
-.drop-btn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;
-  padding:10px 12px;min-height:43px;border-radius:10px;border:1px solid var(--border-input);
-  background:var(--input);color:var(--fg);font-size:16px;font-family:inherit;cursor:pointer;outline:none}
-.drop-btn:focus{border-color:var(--accent)}
-.drop-btn::after{content:"⌄";font-size:18px;color:var(--muted);margin-left:8px;flex:none}
+.drop-btn{display:flex;align-items:center;text-align:left;overflow:hidden;white-space:nowrap}
 .drop-panel{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;
   background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 14px;
   box-shadow:var(--panel-shadow);max-height:280px;overflow:auto}
