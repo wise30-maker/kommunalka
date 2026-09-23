@@ -9,6 +9,19 @@ function fmtShort(n) {
   return String(Math.round(n));
 }
 
+// цвета из CSS-переменных — графики подстраиваются под светлую/тёмную тему
+function uiColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = n => cs.getPropertyValue(n).trim();
+  return { label: v('--muted'), fg: v('--fg'), grid: v('--sep'), accent: v('--accent') };
+}
+function hexToRgba(hex, a) {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex || '');
+  if (!m) return `rgba(10,132,255,${a})`;
+  const n = parseInt(m[1], 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
 function setupCanvas(canvas, cssHeight) {
   const dpr = window.devicePixelRatio || 1;
   const W = canvas.clientWidth || 640;
@@ -23,11 +36,11 @@ function setupCanvas(canvas, cssHeight) {
 }
 
 // Подписи оси X с поворотом 45°; skipEvery > 1 пропускает часть подписей.
-function drawXLabels(ctx, labels, xs, yTop, skipEvery) {
+function drawXLabels(ctx, labels, xs, yTop, skipEvery, color) {
   ctx.save();
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#86868b';
+  ctx.fillStyle = color;
   labels.forEach((lab, i) => {
     if (skipEvery > 1 && i % skipEvery !== 0) return;
     ctx.save();
@@ -40,30 +53,31 @@ function drawXLabels(ctx, labels, xs, yTop, skipEvery) {
   ctx.restore();
 }
 
-function drawGrid(ctx, W, padL, padR, padT, plotH, max) {
+function drawGrid(ctx, W, padL, padR, padT, plotH, max, colors) {
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   for (let i = 0; i <= 4; i++) {
     const y = padT + plotH * (1 - i / 4);
-    ctx.strokeStyle = '#f0f0f2';
+    ctx.strokeStyle = colors.grid;
     ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
-    ctx.fillStyle = '#86868b';
+    ctx.fillStyle = colors.label;
     ctx.fillText(fmtShort(max * i / 4), W - padR - 4, y - 7);
   }
 }
 
 function drawBars(canvas, labels, values, title) {
+  const colors = uiColors();
   const { ctx, W, H } = setupCanvas(canvas, 280);
   const padL = 8, padR = 8, padT = 30, padB = 62;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const max = Math.max(...values, 1) * 1.1;
 
-  ctx.fillStyle = '#86868b';
+  ctx.fillStyle = colors.label;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
   ctx.fillText(title, padL, 18);
 
-  drawGrid(ctx, W, padL, padR, padT, plotH, max);
+  drawGrid(ctx, W, padL, padR, padT, plotH, max, colors);
 
   const n = values.length;
   const iw = plotW / n;
@@ -74,10 +88,10 @@ function drawBars(canvas, labels, values, title) {
   values.forEach((v, i) => {
     const bh = plotH * (v / max);
     const x = xs[i] - barW / 2, y = padT + plotH - bh;
-    ctx.fillStyle = '#007aff';
+    ctx.fillStyle = colors.accent;
     roundRect(ctx, x, y, barW, Math.max(bh, 2), 5);
     ctx.fill();
-    ctx.fillStyle = '#1d1d1f';
+    ctx.fillStyle = colors.fg;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.fillText(fmtShort(v), xs[i], y - 6);
@@ -85,27 +99,28 @@ function drawBars(canvas, labels, values, title) {
 
   if (needRotate) {
     const skip = Math.max(1, Math.ceil(n / Math.max(Math.floor(plotW / 52), 1)));
-    drawXLabels(ctx, labels, xs, H - padB + 14, skip);
+    drawXLabels(ctx, labels, xs, H - padB + 14, skip, colors.label);
   } else {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = '#86868b';
+    ctx.fillStyle = colors.label;
     labels.forEach((l, i) => ctx.fillText(l, xs[i], H - 12));
   }
 }
 
 function drawLine(canvas, labels, values, title) {
+  const colors = uiColors();
   const { ctx, W, H } = setupCanvas(canvas, 280);
   const padL = 8, padR = 14, padT = 30, padB = 62;
   const plotW = W - padL - padR, plotH = H - padT - padB;
   const max = Math.max(...values, 1) * 1.15;
 
-  ctx.fillStyle = '#86868b';
+  ctx.fillStyle = colors.label;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
   ctx.fillText(title, padL, 18);
 
-  drawGrid(ctx, W, padL, padR, padT, plotH, max);
+  drawGrid(ctx, W, padL, padR, padT, plotH, max, colors);
 
   const n = values.length;
   const step = plotW / Math.max(n - 1, 1);
@@ -119,12 +134,12 @@ function drawLine(canvas, labels, values, title) {
   ctx.lineTo(xs[n - 1], padT + plotH);
   ctx.closePath();
   const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
-  grad.addColorStop(0, 'rgba(0,122,255,.18)');
-  grad.addColorStop(1, 'rgba(0,122,255,0)');
+  grad.addColorStop(0, hexToRgba(colors.accent, .18));
+  grad.addColorStop(1, hexToRgba(colors.accent, 0));
   ctx.fillStyle = grad;
   ctx.fill();
 
-  ctx.strokeStyle = '#007aff';
+  ctx.strokeStyle = colors.accent;
   ctx.lineWidth = 2;
   ctx.lineJoin = 'round';
   ctx.beginPath();
@@ -135,20 +150,20 @@ function drawLine(canvas, labels, values, title) {
   xs.forEach((x, i) => {
     ctx.beginPath();
     ctx.arc(x, ys[i], 3.5, 0, 7);
-    ctx.fillStyle = '#007aff';
+    ctx.fillStyle = colors.accent;
     ctx.fill();
-    ctx.strokeStyle = '#fff';
+    ctx.strokeStyle = getComputedStyle(document.body).backgroundColor;
     ctx.lineWidth = 1.5;
     ctx.stroke();
     if (i % skip === 0) {
-      ctx.fillStyle = '#1d1d1f';
+      ctx.fillStyle = colors.fg;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'alphabetic';
       ctx.fillText(fmtShort(values[i]), x, ys[i] - 10);
     }
   });
 
-  drawXLabels(ctx, labels, xs, H - padB + 14, skip);
+  drawXLabels(ctx, labels, xs, H - padB + 14, skip, colors.label);
 }
 
 function roundRect(ctx, x, y, w, h, r) {

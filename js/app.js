@@ -55,12 +55,22 @@ function showError(err) {
 }
 
 // ---------- hash router ----------
+// fwdStack — стек «вперёд»: свайп вправо кладёт текущий экран в стек,
+// свайп влево возвращает его (навигация как в iOS, без выхода из приложения)
+const fwdStack = [];
 function parseHash() {
   return (location.hash || '#/objects').replace(/^#\/?/, '').split('/');
 }
-function go(hash) {
+function go(hash, keepFwd) {
+  if (!keepFwd) fwdStack.length = 0;
   if (location.hash === hash) render();
   else location.hash = hash;
+}
+function parentHash(h) {
+  const seg = h.replace(/^#\/?/, '').split('/');
+  if (seg[0] === 'object' && seg[1] && seg[2]) return `#/object/${seg[1]}`;
+  if (seg[0] === 'object' && seg[1]) return '#/objects';
+  return null;
 }
 function syncStateFromHash() {
   const seg = parseHash();
@@ -80,8 +90,8 @@ function syncStateFromHash() {
 }
 window.addEventListener('hashchange', () => { syncStateFromHash(); render(); });
 
-// свайп вправо = «назад» внутри приложения (никогда не выбрасывает на стартовый экран браузера)
-(function swipeBack() {
+// свайпы: вправо = «назад», влево = «вперёд» (как в iOS). Никогда не выбрасывает из приложения.
+(function swipeNav() {
   let x0 = null, y0 = null;
   document.addEventListener('touchstart', e => {
     x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
@@ -91,13 +101,59 @@ window.addEventListener('hashchange', () => { syncStateFromHash(); render(); });
     const dx = e.changedTouches[0].clientX - x0;
     const dy = e.changedTouches[0].clientY - y0;
     x0 = y0 = null;
-    if (dx > 70 && Math.abs(dx) > Math.abs(dy) * 2) {
-      const seg = parseHash();
-      if (seg[0] === 'object' && seg[1] && seg[2]) go(`#/object/${seg[1]}`);
-      else if (seg[0] === 'object' && seg[1]) go('#/objects');
-      // на верхнем уровне ничего не делаем — пользователь остаётся в приложении
+    if (Math.abs(dx) <= 70 || Math.abs(dx) <= Math.abs(dy) * 2) return;
+    if (dx > 0) {
+      // назад: запоминаем текущий экран, уходим к родителю
+      const cur = location.hash || '#/objects';
+      const parent = parentHash(cur);
+      if (parent) { fwdStack.push(cur); go(parent, true); }
+      // на верхнем уровне ничего не делаем
+    } else {
+      // вперёд: возвращаем экран из стека
+      const next = fwdStack.pop();
+      if (next) go(next, true);
     }
   }, { passive: true });
+})();
+
+// закрытие выпадающих панелей по тапу мимо
+document.addEventListener('click', () => {
+  document.querySelectorAll('.drop-panel').forEach(p => { p.style.display = 'none'; });
+});
+
+// ---------- тема (светлая/тёмная, macOS/iOS-палитры) ----------
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  const btn = document.getElementById('btn-theme');
+  if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('kommunalka_theme', cur);
+  applyTheme(cur);
+  render(); // перерисовать графики в новых цветах
+}
+function initTheme() {
+  const saved = localStorage.getItem('kommunalka_theme');
+  applyTheme(saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+}
+initTheme();
+
+// ---------- клавиатура на телефоне: поле не должно уходить под клавиатуру ----------
+(function keyboardFit() {
+  // добавляем нижний отступ на высоту клавиатуры (iOS не меняет layout viewport)
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      const kb = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
+      document.body.style.paddingBottom = kb > 40 ? (kb + 24) + 'px' : '';
+    });
+  }
+  // при фокусе прокручиваем поле к центру экрана — над клавиатурой
+  document.addEventListener('focusin', e => {
+    if (e.target.matches('input, select, textarea')) {
+      setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 350);
+    }
+  });
 })();
 
 // ---------- auth ----------
@@ -128,6 +184,8 @@ async function boot() {
   if (!state.user) return renderLogin();
   topbar.hidden = false;
   document.getElementById('btn-logout').onclick = () => { DB.logout(); location.hash = ''; location.reload(); };
+  const themeBtn = document.getElementById('btn-theme');
+  if (themeBtn) themeBtn.onclick = toggleTheme;
   await loadObjects();
   if (!location.hash) location.hash = '#/objects';
   syncStateFromHash();
@@ -422,11 +480,22 @@ async function renderReports() {
   monthSel.append(el('option', { value: '' }, 'Весь год'));
   MONTHS.forEach((m, i) => monthSel.append(el('option', { value: i + 1 }, m)));
 
-  // мультивыбор объектов галочками
+  // мультивыбор объектов — выпадающий список с галочками
   const allChk = el('input', { type: 'checkbox' });
   allChk.checked = true;
   const objChks = {};
-  const objBox = el('div', { class: 'chk-grid' });
+  const objBox = el('div', { class: 'drop-panel' });
+  const dropBtn = el('button', { class: 'btn secondary drop-btn', type: 'button' }, 'Все объекты');
+  function dropLabel() {
+    const checked = Object.values(objChks).filter(c => c.checked).length;
+    const total = Object.keys(objChks).length;
+    dropBtn.textContent = checked === total ? 'Все объекты' : `Выбрано: ${checked} из ${total}`;
+  }
+  objBox.addEventListener('click', e => e.stopPropagation());
+  dropBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    objBox.style.display = objBox.style.display === 'block' ? 'none' : 'block';
+  });
   for (const o of state.objects) {
     const cb = el('input', { type: 'checkbox' });
     cb.checked = true;
@@ -434,12 +503,18 @@ async function renderReports() {
     cb.addEventListener('change', () => {
       if (!cb.checked) allChk.checked = false;
       else if (Object.values(objChks).every(c => c.checked)) allChk.checked = true;
+      dropLabel();
     });
     objBox.append(el('label', { class: 'chk' }, cb, o.name));
   }
   allChk.addEventListener('change', () => {
     for (const c of Object.values(objChks)) c.checked = allChk.checked;
+    dropLabel();
   });
+  const allRow = el('label', { class: 'chk' }, allChk, 'Все объекты');
+  objBox.append(allRow);
+  objBox.insertBefore(allRow, objBox.firstChild);
+  dropLabel();
 
   const goBtn = el('button', { class: 'btn', onclick: showReport, style: 'margin-top:16px' }, 'Показать');
   const out = el('div', {});
@@ -448,8 +523,7 @@ async function renderReports() {
       el('div', {}, el('label', {}, 'Год'), yearInp),
       el('div', {}, el('label', {}, 'Период'), monthSel)),
     el('label', {}, 'Объекты'),
-    el('label', { class: 'chk' }, allChk, 'Все объекты'),
-    objBox,
+    el('div', { class: 'drop-wrap' }, dropBtn, objBox),
     goBtn), out);
 
   const monthOf = (p) => Math.round((p.sort_key - p.year) * 100);

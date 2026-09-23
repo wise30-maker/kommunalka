@@ -1,25 +1,37 @@
-/* Коммуналка — дизайн в духе macOS/iOS (светлая тема, системный шрифт) */
+/* Коммуналка — дизайн в духе macOS/iOS. Светлая и тёмная темы через CSS-переменные. */
 :root{
   --bg:#f5f5f7; --card:#ffffff; --fg:#1d1d1f; --muted:#86868b;
   --accent:#007aff; --accent-fg:#ffffff; --border:#e3e3e6; --input:#ffffff;
   --border-input:#d2d2d7; --danger:#ff3b30; --ok:#34c759; --sep:#f0f0f2;
+  --secondary-btn:#e8e8ed; --nav-active:rgba(0,0,0,.06);
+  --header-bg:rgba(255,255,255,.72);
   --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.05);
+  --panel-shadow:0 8px 28px rgba(0,0,0,.16);
+}
+[data-theme="dark"]{
+  --bg:#1c1c1e; --card:#2c2c2e; --fg:#f2f2f7; --muted:#8e8e93;
+  --accent:#0a84ff; --accent-fg:#ffffff; --border:#3a3a3c; --input:#1c1c1e;
+  --border-input:#48484a; --danger:#ff453a; --ok:#30d158; --sep:#3a3a3c;
+  --secondary-btn:#3a3a3c; --nav-active:rgba(255,255,255,.12);
+  --header-bg:rgba(28,28,30,.72);
+  --shadow:0 1px 3px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+  --panel-shadow:0 8px 28px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scrollbar-width:thin}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
   background:var(--bg);color:var(--fg);margin:0;font-size:16px;line-height:1.4;
-  -webkit-font-smoothing:antialiased}
+  -webkit-font-smoothing:antialiased;transition:background .25s}
 main{max-width:860px;margin:0 auto;padding:16px 16px 40px}
 header{display:flex;align-items:center;gap:14px;padding:12px 16px;position:sticky;top:0;z-index:10;
-  background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);
+  background:var(--header-bg);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);
   border-bottom:1px solid var(--border)}
 header nav{display:flex;gap:4px;flex:1}
 header nav button{background:none;border:none;color:var(--muted);font-size:15px;font-weight:500;cursor:pointer;padding:6px 10px;border-radius:8px}
-header nav button.active{color:var(--fg);background:rgba(0,0,0,.06)}
+header nav button.active{color:var(--fg);background:var(--nav-active)}
 #topbar-title{font-weight:700;font-size:17px;letter-spacing:-.02em}
 button.link{background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;font-weight:500}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);transition:background .25s}
 h1{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:0 0 14px}
 h2{font-size:17px;font-weight:600;margin:0 0 10px;letter-spacing:-.01em}
 label{display:block;color:var(--muted);font-size:13px;margin:10px 0 4px;font-weight:500}
@@ -31,7 +43,7 @@ input[type=number]{-moz-appearance:textfield}
 .btn{display:inline-block;background:var(--accent);color:var(--accent-fg);border:none;border-radius:10px;
   padding:11px 20px;font-size:16px;font-weight:600;cursor:pointer;transition:opacity .15s}
 .btn:active{opacity:.75}
-.btn.secondary{background:#e8e8ed;color:var(--fg)}
+.btn.secondary{background:var(--secondary-btn);color:var(--fg)}
 .btn.small{padding:7px 12px;font-size:14px}
 .btn.danger{background:none;color:var(--danger);border:1px solid var(--danger)}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
@@ -44,18 +56,26 @@ tr:last-child td{border-bottom:none}
 tr.total td{font-weight:700;border-top:2px solid var(--accent)}
 tr.year-sep td{color:var(--accent);font-weight:700;padding-top:16px;border-bottom:none;font-size:14px;letter-spacing:.02em}
 .muted{color:var(--muted)}
-.error{background:#ffeceb;color:#c0392b;padding:12px 14px;border-radius:12px;margin:10px 0;font-size:14px;font-weight:500}
+.error{background:var(--danger);color:#fff;padding:12px 14px;border-radius:12px;margin:10px 0;font-size:14px;font-weight:500;opacity:.92}
 .obj-list button.item{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--border);
   color:var(--fg);border-radius:16px;padding:17px;margin-bottom:10px;font-size:17px;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
 .obj-list button.item:active{transform:scale(.985)}
 .total-big{font-size:22px;font-weight:700;margin:12px 0;letter-spacing:-.02em}
 .total-big span{color:var(--ok)}
 .chk{display:flex;align-items:center;padding:7px 0;color:var(--fg);font-size:16px;font-weight:400}
-.chk-grid{display:flex;flex-wrap:wrap;gap:2px 18px}
 canvas{width:100%;background:var(--card);border-radius:12px;touch-action:pan-y}
 .back{display:inline-flex;align-items:center;gap:2px;background:none;border:none;color:var(--accent);cursor:pointer;
   font-size:16px;font-weight:500;padding:4px 0 12px;margin-left:-4px}
 .back::before{content:"‹";font-size:22px;line-height:1;margin-top:-1px}
 .item-row{display:flex;gap:8px;align-items:center;margin-bottom:4px}
 .item-row input{flex:1}
+/* выпадающая панель с галочками (отчёты) */
+.drop-wrap{position:relative}
+.drop-btn{width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center}
+.drop-btn::after{content:"⌄";font-size:18px;color:var(--muted)}
+.drop-panel{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 14px;
+  box-shadow:var(--panel-shadow);max-height:280px;overflow:auto}
+.drop-panel .chk{padding:9px 0;border-bottom:1px solid var(--sep);margin:0}
+.drop-panel .chk:last-child{border-bottom:none}
 @media(max-width:600px){main{padding:12px 12px 32px}h1{font-size:22px}th,td{padding:8px 4px;font-size:14px}}
