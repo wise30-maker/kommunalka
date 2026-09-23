@@ -485,7 +485,7 @@ async function renderReports() {
   allChk.checked = true;
   const objChks = {};
   const objBox = el('div', { class: 'drop-panel' });
-  const dropBtn = el('button', { class: 'btn secondary drop-btn', type: 'button' }, 'Все объекты');
+  const dropBtn = el('button', { class: 'drop-btn', type: 'button' }, 'Все объекты');
   function dropLabel() {
     const checked = Object.values(objChks).filter(c => c.checked).length;
     const total = Object.keys(objChks).length;

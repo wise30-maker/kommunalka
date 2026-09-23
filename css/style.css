@@ -69,10 +69,13 @@ canvas{width:100%;background:var(--card);border-radius:12px;touch-action:pan-y}
 .back::before{content:"‹";font-size:22px;line-height:1;margin-top:-1px}
 .item-row{display:flex;gap:8px;align-items:center;margin-bottom:4px}
 .item-row input{flex:1}
-/* выпадающая панель с галочками (отчёты) */
+/* выпадающий список с галочками (отчёты) — визуально как обычный select */
 .drop-wrap{position:relative}
-.drop-btn{width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center}
-.drop-btn::after{content:"⌄";font-size:18px;color:var(--muted)}
+.drop-btn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;
+  padding:10px 12px;min-height:43px;border-radius:10px;border:1px solid var(--border-input);
+  background:var(--input);color:var(--fg);font-size:16px;font-family:inherit;cursor:pointer;outline:none}
+.drop-btn:focus{border-color:var(--accent)}
+.drop-btn::after{content:"⌄";font-size:18px;color:var(--muted);margin-left:8px;flex:none}
 .drop-panel{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;
   background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 14px;
   box-shadow:var(--panel-shadow);max-height:280px;overflow:auto}
