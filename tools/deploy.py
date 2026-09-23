@@ -1,7 +1,7 @@
 # Коммитит текущее деревео через GitHub API: содержимое деревьев + base_tree
 import os, json, urllib.request, base64, sys, subprocess
-
-TOKEN = os.environ['GITHUB_TOKEN']
+TOKEN_PATH = os.path.join(os.path.expanduser("~"), ".kommunalka-github-token")
+TOKEN = os.environ.get('GITHUB_TOKEN') or open(TOKEN_PATH, encoding='ascii').read().strip()
 REPO = "wise30-maker/kommunalka"
 API = f"https://api.github.com/repos/{REPO}"
 
@@ -16,10 +16,12 @@ def req(method, url, payload=None):
     except urllib.error.HTTPError as e:
         print("HTTP", e.code, e.read()[:300]); sys.exit(1)
 
-# файлы: отслеживаемые git'ом, исключая openspec и служебное
+# файлы: отслеживаемые git'ом + локальный js/config.js (в .gitignore, но нужен на сайте)
 files = subprocess.check_output(["git", "ls-files"], text=True).split()
 skip_prefixes = (".hermes/",)
 files = [f for f in files if not f.startswith(skip_prefixes)]
+if os.path.exists("js/config.js") and "js/config.js" not in files:
+    files.append("js/config.js")
 print("deploy files:", files)
 
 base = req("GET", f"{API}/git/ref/heads/main")

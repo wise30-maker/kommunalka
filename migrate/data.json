@@ -1,0 +1,2322 @@
+[
+ {
+  "name": "Фурманова 193",
+  "split_water": true,
+  "items": {
+   "Комуналка": "kvartplata",
+   "Э\\Э": "electro",
+   "Вода": "voda",
+   "ТКО": "tko",
+   "Домофон": "domofon",
+   "Кап. Рем": "kapremont"
+  },
+  "periods": [
+   {
+    "year": 2024,
+    "label": "Октябрь",
+    "month": 10,
+    "payments": {},
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 305.295
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 109.862
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 22520.21
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 6114.25
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2024,
+    "label": "Ноябрь",
+    "month": 11,
+    "payments": {
+     "kvartplata": 4674.9,
+     "electro": 553.45,
+     "voda": 174.0,
+     "tko": 1680.55,
+     "domofon": 515.03,
+     "kapremont": 2689.12
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 313.202
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 111.889
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 23114.82
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 6259.42
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2024,
+    "label": "Декабрь",
+    "month": 12,
+    "payments": {
+     "kvartplata": 7969.85,
+     "electro": 174.0,
+     "voda": 880.35,
+     "tko": 1030.06,
+     "domofon": 549.99,
+     "kapremont": 3581.25
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 321.342
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 115.159
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 23819.76
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 6468.46
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Январь",
+    "month": 1,
+    "payments": {
+     "kvartplata": 6250.24,
+     "electro": 1100.0,
+     "voda": 174.0,
+     "tko": 4308.79,
+     "domofon": 969.04,
+     "kapremont": 515.03
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 330.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 120.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 24100.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 6500.0
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Февраль",
+    "month": 2,
+    "payments": {
+     "kvartplata": 11383.48,
+     "electro": 3663.86,
+     "voda": 1000.0,
+     "tko": 1074.58,
+     "domofon": 515.03,
+     "kapremont": 174.0
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 340.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 126.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 24500.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 6530.0
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Март",
+    "month": 3,
+    "payments": {},
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 350.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 132.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 25000.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 6560.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Апрель",
+    "month": 4,
+    "payments": {
+     "kvartplata": 1031.0,
+     "electro": 3821.0,
+     "voda": 174.0,
+     "tko": 17003.0,
+     "domofon": 5708.0
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 360.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 138.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 25000.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 6590.0
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Май",
+    "month": 5,
+    "payments": {
+     "kvartplata": 4805.66,
+     "electro": 174.0,
+     "voda": 76.15,
+     "tko": 515.03,
+     "domofon": 2693.08,
+     "kapremont": 3508.27
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 370.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 142.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 26000.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 6620.0
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Июнь",
+    "month": 6,
+    "payments": {
+     "kvartplata": 3869.3,
+     "electro": 1.0,
+     "voda": 1560.88,
+     "tko": 1030.06,
+     "domofon": 174.0,
+     "kapremont": 934.42
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 380.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 150.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 26761.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 7184.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Июль",
+    "month": 7,
+    "payments": {
+     "kvartplata": 3869.3,
+     "electro": 2832.79,
+     "voda": 1622.68,
+     "tko": 52.53,
+     "domofon": 174.0,
+     "kapremont": 934.42
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 381.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 150.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 27659.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 7327.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Август + Сентябрь",
+    "month": 8,
+    "payments": {
+     "kvartplata": 8746.74,
+     "electro": 8155.05,
+     "voda": 1418.34,
+     "tko": 1135.12,
+     "domofon": 348.0,
+     "kapremont": 1838.39
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 385.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 150.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 28659.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 7500.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Октябрь",
+    "month": 10,
+    "payments": {
+     "kvartplata": 5898.19,
+     "electro": 3338.44,
+     "voda": 997.36,
+     "tko": 567.56,
+     "domofon": 114.0,
+     "kapremont": 923.27
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 395.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 160.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 29350.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 7700.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Ноябрь\\декабрь",
+    "month": 11,
+    "payments": {
+     "kvartplata": 21769.0,
+     "electro": 7726.45,
+     "voda": 2617.58,
+     "tko": 1135.12,
+     "domofon": 348.0,
+     "kapremont": 1846.54
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 400.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 170.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 29900.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 8000.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Январь",
+    "month": 1,
+    "payments": {
+     "kvartplata": 13633.09,
+     "electro": 3200.0,
+     "voda": 1269.93,
+     "tko": 567.56,
+     "domofon": 174.0,
+     "kapremont": 970.68
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 420.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 180.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 30500.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 8300.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Февраль",
+    "month": 2,
+    "payments": {
+     "kvartplata": 13217.55,
+     "electro": 2997.81,
+     "voda": 1980.23,
+     "tko": 1135.12,
+     "domofon": 174.0,
+     "kapremont": 961.07
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 440.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 190.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 31000.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 8700.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Март\\Апрель",
+    "month": 3,
+    "payments": {
+     "kvartplata": 18829.0,
+     "electro": 7058.92,
+     "voda": 3681.51,
+     "tko": 567.56,
+     "domofon": 348.0,
+     "kapremont": 1922.14
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 440.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 190.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 31000.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 8700.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Июль",
+    "month": 7,
+    "payments": {
+     "kvartplata": 4863.52,
+     "electro": 3781.27,
+     "voda": 483.79,
+     "tko": 567.52,
+     "domofon": 174.0,
+     "kapremont": 961.07
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 460.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 210.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 32000.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 8900.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Август",
+    "month": 8,
+    "payments": {
+     "kvartplata": 4903.48,
+     "electro": 3907.31,
+     "voda": 1503.59,
+     "tko": 567.52,
+     "domofon": 174.0,
+     "kapremont": 961.07
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 470.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": "bath",
+      "value": 220.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 33500.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 8950.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Сентябрь",
+    "month": 9,
+    "payments": {
+     "kvartplata": 4865.2,
+     "electro": 1102.58,
+     "voda": 795.63,
+     "tko": 567.52,
+     "domofon": 174.0,
+     "kapremont": 961.07
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": "kitchen",
+      "value": 81.192
+     },
+     {
+      "kind": "water_hot",
+      "zone": "kitchen",
+      "value": 23.05
+     },
+     {
+      "kind": "water_cold",
+      "zone": "bath",
+      "value": 469.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 34058.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 9083.0
+     }
+    ],
+    "approximate": false
+   }
+  ]
+ },
+ {
+  "name": "Фурманова 177",
+  "split_water": false,
+  "items": {
+   "Комуналка": "kvartplata",
+   "Э\\Э": "electro",
+   "Вода": "voda",
+   "ТКО": "tko",
+   "Домофон": "domofon",
+   "Кап. Рем": "kapremont"
+  },
+  "periods": [
+   {
+    "year": 2024,
+    "label": "Октябрь",
+    "month": 10,
+    "payments": {},
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 676.911
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 326.48
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12030.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 3894.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2024,
+    "label": "Ноябрь",
+    "month": 11,
+    "payments": {
+     "kvartplata": 160.63,
+     "electro": 174.0,
+     "voda": 96.81,
+     "tko": 150.42,
+     "domofon": 3671.0,
+     "kapremont": 1276.91
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 681.965
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 328.741
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12106.65
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 3922.11
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2024,
+    "label": "Декабрь",
+    "month": 12,
+    "payments": {
+     "kvartplata": 2522.67,
+     "electro": 174.0,
+     "voda": 160.63,
+     "tko": 744.66,
+     "domofon": 150.42,
+     "kapremont": 979.71
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 687.282
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 331.74
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12166.69
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 3942.44
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Январь",
+    "month": 1,
+    "payments": {
+     "kvartplata": 4810.83,
+     "electro": 160.63,
+     "voda": 777.82,
+     "tko": 150.42,
+     "domofon": 366.6,
+     "kapremont": 174.0
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 691.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 335.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12200.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 3962.0
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Февраль",
+    "month": 2,
+    "payments": {
+     "kvartplata": 4679.13,
+     "electro": 269.65,
+     "voda": 738.78,
+     "tko": 150.42,
+     "domofon": 174.0,
+     "kapremont": 582.9
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 700.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 340.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12230.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 3982.0
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Март",
+    "month": 3,
+    "payments": {},
+    "readings": [],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Апрель",
+    "month": 4,
+    "payments": {
+     "kvartplata": 545.0,
+     "electro": 9.0,
+     "voda": 5883.0,
+     "tko": 1908.0,
+     "domofon": 301.0,
+     "kapremont": 174.0
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 667.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 349.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12450.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4052.0
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "май",
+    "month": 5,
+    "payments": {
+     "kvartplata": 3031.51,
+     "electro": 507.66,
+     "voda": 174.0,
+     "tko": 663.16,
+     "domofon": 150.42,
+     "kapremont": 269.65
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 680.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 352.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12480.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4060.0
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Июнь",
+    "month": 6,
+    "payments": {
+     "kvartplata": 1454.2,
+     "electro": 181.78,
+     "voda": 1349.0,
+     "tko": 300.84,
+     "domofon": 174.0,
+     "kapremont": 269.65
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 683.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 354.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12500.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4065.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Июль",
+    "month": 7,
+    "payments": {
+     "kvartplata": 1454.2,
+     "electro": 1800.0,
+     "voda": 1349.0,
+     "tko": 15.34,
+     "domofon": 174.0,
+     "kapremont": 269.65
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 685.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 356.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12770.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4170.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Август + Сентябрь",
+    "month": 8,
+    "payments": {
+     "kvartplata": 3354.23,
+     "electro": 2229.19,
+     "voda": 1055.05,
+     "tko": 331.52,
+     "domofon": 348.0,
+     "kapremont": 539.3
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 694.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 358.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12775.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4173.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Октябрь",
+    "month": 10,
+    "payments": {
+     "kvartplata": 2399.5,
+     "electro": 720.0,
+     "voda": 265.1,
+     "tko": 165.76,
+     "domofon": 114.0,
+     "kapremont": 269.65
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 700.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 363.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12830.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4178.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Ноябрь\\Декабрь",
+    "month": 11,
+    "payments": {
+     "kvartplata": 7501.6,
+     "electro": 1067.23,
+     "voda": 1805.54,
+     "tko": 331.52,
+     "domofon": 348.0,
+     "kapremont": 544.69
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 706.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 366.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12855.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4182.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Январь",
+    "month": 1,
+    "payments": {
+     "kvartplata": 4127.66,
+     "electro": 64.0,
+     "voda": 918.0,
+     "tko": 166.0,
+     "domofon": 174.0,
+     "kapremont": 269.65
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 719.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 372.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12890.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4190.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Февраль",
+    "month": 2,
+    "payments": {
+     "kvartplata": 3944.35,
+     "electro": 620.89,
+     "voda": 980.32,
+     "tko": 331.52,
+     "domofon": 174.0,
+     "kapremont": 291.73
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 725.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 375.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 12920.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4200.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Март\\Апрель",
+    "month": 3,
+    "payments": {
+     "kvartplata": 5919.43,
+     "electro": 658.0,
+     "voda": 2136.88,
+     "tko": 165.76,
+     "domofon": 348.0,
+     "kapremont": 561.38
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 760.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 360.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 13571.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4431.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Июль",
+    "month": 7,
+    "payments": {
+     "electro": 662.67,
+     "voda": 1016.81,
+     "tko": 165.76,
+     "domofon": 174.0,
+     "kapremont": 280.69
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 765.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 370.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 13600.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4440.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Август",
+    "month": 8,
+    "payments": {
+     "electro": 684.76,
+     "voda": 1412.0,
+     "tko": 165.76,
+     "domofon": 174.0,
+     "kapremont": 280.69
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 770.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 375.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 13630.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4445.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Сентябрь",
+    "month": 9,
+    "payments": {
+     "kvartplata": 671.23,
+     "electro": 1609.61,
+     "voda": 811.59,
+     "tko": 165.76,
+     "domofon": 174.0,
+     "kapremont": 280.69
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 777.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 379.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 13640.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 4450.0
+     }
+    ],
+    "approximate": false
+   }
+  ]
+ },
+ {
+  "name": "Нордик",
+  "split_water": false,
+  "items": {
+   "Комуналка": "kvartplata",
+   "Э\\Э": "electro",
+   "Отопление": "otoplenie",
+   "ТКО": "tko",
+   "Домофон": "domofon",
+   "Кап. Рем": "kapremont",
+   "Вода": "voda"
+  },
+  "periods": [
+   {
+    "year": 2024,
+    "label": "Октябрь",
+    "month": 10,
+    "payments": {},
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 28.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 1923.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2024,
+    "label": "Ноябрь",
+    "month": 11,
+    "payments": {
+     "kvartplata": 1615.51,
+     "electro": 1666.48,
+     "otoplenie": 185.3,
+     "tko": 3375.6
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 40.612
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 1930.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.11
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2024,
+    "label": "Декабрь",
+    "month": 12,
+    "payments": {
+     "kvartplata": 1696.94,
+     "electro": 183.3,
+     "otoplenie": 2124.2,
+     "tko": 500.0
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 47.244
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2493.06
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.11
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Январь",
+    "month": 1,
+    "payments": {
+     "kvartplata": 1062.1,
+     "electro": 1733.98,
+     "otoplenie": 185.3
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 50.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2593.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.11
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Февраль",
+    "month": 2,
+    "payments": {
+     "kvartplata": 2135.38,
+     "electro": 3135.98,
+     "otoplenie": 186.0,
+     "tko": 1500.0
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 53.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2620.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.11
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Март",
+    "month": 3,
+    "payments": {},
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 56.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2640.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.11
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Апрель",
+    "month": 4,
+    "payments": {
+     "kvartplata": 10.0,
+     "electro": 370.0,
+     "otoplenie": 10.0
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 60.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2660.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.11
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Май",
+    "month": 5,
+    "payments": {
+     "kvartplata": 185.3,
+     "electro": 1132.07,
+     "otoplenie": 1035.33,
+     "tko": 211.08
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 64.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2680.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.11
+     }
+    ],
+    "approximate": true
+   },
+   {
+    "year": 2025,
+    "label": "Июнь",
+    "month": 6,
+    "payments": {
+     "kvartplata": 1509.0,
+     "electro": 1034.15,
+     "tko": 370.6
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 68.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2685.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Июль",
+    "month": 7,
+    "payments": {
+     "kvartplata": 1467.46,
+     "electro": 1180.9,
+     "tko": 18.9
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 70.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2690.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Август + Сентябрь",
+    "month": 8,
+    "payments": {
+     "kvartplata": 3005.22,
+     "electro": 2295.93,
+     "tko": 408.4
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 72.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2695.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Октябрь",
+    "month": 10,
+    "payments": {
+     "kvartplata": 1518.85,
+     "electro": 1169.28,
+     "otoplenie": 1341.43,
+     "tko": 204.2
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 74.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2700.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2025,
+    "label": "Ноябрь\\декабрь",
+    "month": 11,
+    "payments": {
+     "kvartplata": 3026.38,
+     "electro": 2318.31,
+     "otoplenie": 6853.36,
+     "tko": 408.4
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 80.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2725.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Январь",
+    "month": 1,
+    "payments": {
+     "kvartplata": 1603.56,
+     "electro": 5876.78,
+     "tko": 204.2
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 86.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2750.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Февраль",
+    "month": 2,
+    "payments": {
+     "kvartplata": 1554.34,
+     "electro": 1071.17,
+     "otoplenie": 3970.3,
+     "tko": 408.4
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 90.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2760.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Март\\Апрель",
+    "month": 3,
+    "payments": {
+     "electro": 2333.63,
+     "otoplenie": 5371.91,
+     "tko": 204.2,
+     "voda": 4596.49
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 95.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2770.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Июль",
+    "month": 7,
+    "payments": {
+     "kvartplata": 1504.56,
+     "electro": 1275.12,
+     "otoplenie": 1355.49,
+     "tko": 204.2
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 100.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2780.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Август",
+    "month": 8,
+    "payments": {
+     "kvartplata": 1504.56,
+     "electro": 1275.12,
+     "tko": 204.2
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 105.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2790.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Сентябрь",
+    "month": 9,
+    "payments": {
+     "kvartplata": 1471.78,
+     "electro": 1275.12,
+     "tko": 204.2,
+     "voda": 1262.3
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 130.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 11.028
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 2800.0
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 0.1
+     }
+    ],
+    "approximate": false
+   }
+  ]
+ },
+ {
+  "name": "Вахова 4",
+  "split_water": false,
+  "items": {
+   "Комуналка": "kvartplata",
+   "КапРемонт": "kapremont"
+  },
+  "periods": [
+   {
+    "year": 2026,
+    "label": "Июль",
+    "month": 7,
+    "payments": {
+     "kvartplata": 4936.32,
+     "kapremont": 745.9
+    },
+    "readings": [],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Август",
+    "month": 8,
+    "payments": {
+     "kvartplata": 5945.21,
+     "kapremont": 745.9
+    },
+    "readings": [],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Сентябрь",
+    "month": 9,
+    "payments": {
+     "kvartplata": 5657.83,
+     "kapremont": 745.9
+    },
+    "readings": [],
+    "approximate": false
+   }
+  ]
+ },
+ {
+  "name": "Даниловского",
+  "split_water": false,
+  "items": {
+   "Газ": "gaz",
+   "ТВ": "tv",
+   "ТКО": "tko",
+   "Кап рем.": "kapremont",
+   "Вода": "voda",
+   "Комуналка": "kvartplata",
+   "Отопление": "otoplenie",
+   "Э/Э": "electro",
+   "домофон": "domofon"
+  },
+  "periods": [
+   {
+    "year": 2026,
+    "label": "Июль",
+    "month": 7,
+    "payments": {
+     "gaz": 2132.11,
+     "tv": 1560.0,
+     "tko": 544.16,
+     "kapremont": 1327.16,
+     "voda": 1758.74,
+     "kvartplata": 5912.32,
+     "otoplenie": 2563.65,
+     "electro": 1793.4
+    },
+    "readings": [
+     {
+      "kind": "water_cold",
+      "zone": null,
+      "value": 653.0
+     },
+     {
+      "kind": "water_hot",
+      "zone": null,
+      "value": 637.0
+     },
+     {
+      "kind": "elec_day",
+      "zone": null,
+      "value": 73.18
+     },
+     {
+      "kind": "elec_night",
+      "zone": null,
+      "value": 2362.0
+     }
+    ],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Август",
+    "month": 8,
+    "payments": {
+     "gaz": 547.91,
+     "tv": 213.0,
+     "tko": 285.28,
+     "kapremont": 1990.0,
+     "voda": 964.2,
+     "kvartplata": 2970.17,
+     "otoplenie": 626.71,
+     "electro": 949.2,
+     "domofon": 270.0
+    },
+    "readings": [],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Сентябрь",
+    "month": 9,
+    "payments": {
+     "gaz": 547.91,
+     "tv": 213.0,
+     "tko": 285.28,
+     "voda": 4542.25,
+     "kvartplata": 2970.17,
+     "otoplenie": 615.55
+    },
+    "readings": [],
+    "approximate": false
+   },
+   {
+    "year": 2026,
+    "label": "Октябрь",
+    "month": 10,
+    "payments": {
+     "gaz": 547.91,
+     "tv": 213.0,
+     "tko": 285.28,
+     "voda": 1348.0,
+     "kvartplata": 2907.17,
+     "otoplenie": 5216.03,
+     "electro": 836.73
+    },
+    "readings": [],
+    "approximate": false
+   }
+  ]
+ }
+]
