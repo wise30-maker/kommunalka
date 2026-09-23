@@ -145,13 +145,20 @@ async function renderObjectDetail() {
 
   if (!state.items.length) await ensureDefaultItems(o);
 
-  const years = [...new Set(state.data.map(p => p.year))].sort();
+  // одна таблица на все годы: колонки выровнены, новые записи сверху
   const hist = el('div', { class: 'card' }, el('h2', {}, 'История'));
-  for (const y of years) {
-    hist.append(el('div', { class: 'muted', style: 'margin:8px 0 2px' }, String(y)));
+  if (!state.data.length) {
+    hist.append(el('div', { class: 'muted' }, 'Пока нет записей'));
+  } else {
     const table = el('table');
-    table.append(el('tr', {}, el('th', {}, 'Период'), el('th', {}, 'Итого, ₽'), el('th', {}, ''), el('th', {}, '')));
-    for (const p of state.data.filter(x => x.year === y)) {
+    table.append(el('tr', {}, el('th', {}, 'Период'), el('th', {}, 'Итого, ₽'), el('th', {}), el('th', {})));
+    const desc = [...state.data].sort((a, b) => b.sort_key - a.sort_key);
+    let lastYear = null;
+    for (const p of desc) {
+      if (p.year !== lastYear) {
+        lastYear = p.year;
+        table.append(el('tr', { class: 'year-sep' }, el('td', { colspan: 4 }, String(p.year))));
+      }
       const edit = el('button', { class: 'link', onclick: () => renderPeriodForm(p) }, 'изменить');
       const del = el('button', {
         class: 'link', style: 'color:var(--danger)',
@@ -161,7 +168,6 @@ async function renderObjectDetail() {
     }
     hist.append(table);
   }
-  if (!state.data.length) hist.append(el('div', { class: 'muted' }, 'Пока нет записей'));
 
   const newBtn = el('button', { class: 'btn', onclick: () => renderPeriodForm(null) }, '+ Новый месяц');
   const settingsBtn = el('button', { class: 'btn secondary', onclick: renderObjectSettings }, 'Настройки объекта');
