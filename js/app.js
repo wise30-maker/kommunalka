@@ -1,4 +1,5 @@
-// Приложение «Коммуналка»: экраны, ввод, отчёты.
+// Приложение «Коммуналка»: экраны, ввод, отчёты. Навигация — через hash-роутинг,
+// свайп вправо = назад (как в iOS), никогда не выбрасывает из приложения.
 const ITEM_CATALOG = [
   ['kvartplata', 'Квартплата (коммуналка)'],
   ['electro', 'Электроэнергия'],
@@ -22,7 +23,7 @@ const app = document.getElementById('app');
 const topbar = document.getElementById('topbar');
 const topbarNav = document.getElementById('topbar-nav');
 
-const state = { user: null, objects: [], object: null, data: null, view: 'objects' };
+const state = { user: null, objects: [], object: null, data: null, items: null, view: 'objects', sub: null, periodId: null };
 
 // ---------- helpers ----------
 function el(tag, attrs = {}, ...kids) {
@@ -48,19 +49,56 @@ function labelSortKey(year, label) {
   }
   return year;
 }
-function monthNum(label) {
-  const lower = label.toLowerCase();
-  for (let i = 0; i < MONTHS.length; i++) if (lower.includes(MONTHS[i].toLowerCase())) return i + 1;
-  return 0;
-}
 function showError(err) {
   app.prepend(el('div', { class: 'error' }, String(err?.message || err)));
   window.scrollTo(0, 0);
 }
-function navButton(text, view, active) {
-  const b = el('button', { class: active ? 'active' : '', onclick: () => { state.view = view; render(); } }, text);
-  return b;
+
+// ---------- hash router ----------
+function parseHash() {
+  return (location.hash || '#/objects').replace(/^#\/?/, '').split('/');
 }
+function go(hash) {
+  if (location.hash === hash) render();
+  else location.hash = hash;
+}
+function syncStateFromHash() {
+  const seg = parseHash();
+  state.sub = null; state.periodId = null;
+  if (seg[0] === 'reports') { state.view = 'reports'; state.object = null; return; }
+  state.view = 'objects';
+  if (seg[0] === 'object' && seg[1]) {
+    if (!state.object || state.object.id !== seg[1]) {
+      state.object = state.objects.find(o => o.id === seg[1]) || null;
+      state.data = null; state.items = null;
+    }
+    state.sub = seg[2] || null;
+    state.periodId = seg[3] || null;
+  } else {
+    state.object = null; state.data = null; state.items = null;
+  }
+}
+window.addEventListener('hashchange', () => { syncStateFromHash(); render(); });
+
+// свайп вправо = «назад» внутри приложения (никогда не выбрасывает на стартовый экран браузера)
+(function swipeBack() {
+  let x0 = null, y0 = null;
+  document.addEventListener('touchstart', e => {
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    const dy = e.changedTouches[0].clientY - y0;
+    x0 = y0 = null;
+    if (dx > 70 && Math.abs(dx) > Math.abs(dy) * 2) {
+      const seg = parseHash();
+      if (seg[0] === 'object' && seg[1] && seg[2]) go(`#/object/${seg[1]}`);
+      else if (seg[0] === 'object' && seg[1]) go('#/objects');
+      // на верхнем уровне ничего не делаем — пользователь остаётся в приложении
+    }
+  }, { passive: true });
+})();
 
 // ---------- auth ----------
 async function renderLogin() {
@@ -89,8 +127,10 @@ async function boot() {
   state.user = await DB.currentUser();
   if (!state.user) return renderLogin();
   topbar.hidden = false;
-  document.getElementById('btn-logout').onclick = () => { DB.logout(); location.reload(); };
+  document.getElementById('btn-logout').onclick = () => { DB.logout(); location.hash = ''; location.reload(); };
   await loadObjects();
+  if (!location.hash) location.hash = '#/objects';
+  syncStateFromHash();
   render();
 }
 
@@ -101,29 +141,31 @@ async function loadObjects() {
 // ---------- render root ----------
 function render() {
   topbarNav.innerHTML = '';
-  topbarNav.append(navButton('Объекты', 'objects', state.view !== 'reports'));
-  topbarNav.append(navButton('Отчёты', 'reports', state.view === 'reports'));
+  topbarNav.append(el('button', { class: state.view !== 'reports' ? 'active' : '', onclick: () => go('#/objects') }, 'Объекты'));
+  topbarNav.append(el('button', { class: state.view === 'reports' ? 'active' : '', onclick: () => go('#/reports') }, 'Отчёты'));
   if (state.view === 'reports') return renderReports();
-  if (state.object) return renderObjectDetail();
-  renderObjects();
+  if (!state.object) return renderObjects();
+  if (state.sub === 'settings') return renderObjectSettings();
+  if (state.sub === 'period') return renderPeriodForm(state.periodId);
+  return renderObjectDetail();
 }
 
 // ---------- objects ----------
 function renderObjects() {
-  state.object = null;
   app.innerHTML = '';
   const nameInput = el('input', { placeholder: 'Новый объект, напр. «Ленина 1»' });
   const add = async () => {
     const name = nameInput.value.trim();
     if (!name) return;
     try {
-      await DB.createObject({ name, sort_order: state.objects.length });
-      await loadObjects(); renderObjects();
+      const [created] = await DB.createObject({ name, sort_order: state.objects.length });
+      await loadObjects();
+      go(`#/object/${created.id}`);
     } catch (err) { showError(err); }
   };
   const list = el('div', { class: 'obj-list' });
   for (const o of state.objects) {
-    list.append(el('button', { class: 'item', onclick: () => { state.object = o; render(); } }, o.name));
+    list.append(el('button', { class: 'item', onclick: () => go(`#/object/${o.id}`) }, o.name));
   }
   app.append(
     el('h1', {}, 'Объекты'),
@@ -136,11 +178,11 @@ function renderObjects() {
 async function renderObjectDetail() {
   const o = state.object;
   app.innerHTML = '';
-  app.append(el('button', { class: 'back', onclick: () => { state.object = null; render(); } }, '← Объекты'));
+  app.append(el('button', { class: 'back', onclick: () => go('#/objects') }, 'Объекты'));
   app.append(el('h1', {}, o.name));
   try {
-    state.data = await DB.loadObjectData(o.id);
-    state.items = await DB.listItems(o.id);
+    if (!state.data) state.data = await DB.loadObjectData(o.id);
+    if (!state.items) state.items = await DB.listItems(o.id);
   } catch (err) { return showError(err); }
 
   if (!state.items.length) await ensureDefaultItems(o);
@@ -159,18 +201,18 @@ async function renderObjectDetail() {
         lastYear = p.year;
         table.append(el('tr', { class: 'year-sep' }, el('td', { colspan: 4 }, String(p.year))));
       }
-      const edit = el('button', { class: 'link', onclick: () => renderPeriodForm(p) }, 'изменить');
+      const edit = el('button', { class: 'link', onclick: () => go(`#/object/${o.id}/period/${p.id}`) }, 'изменить');
       const del = el('button', {
         class: 'link', style: 'color:var(--danger)',
-        onclick: async () => { if (confirm(`Удалить период «${p.label}»?`)) { try { await DB.deletePeriod(p.id); renderObjectDetail(); } catch (e) { showError(e); } } }
+        onclick: async () => { if (confirm(`Удалить период «${p.label}»?`)) { try { await DB.deletePeriod(p.id); state.data = null; renderObjectDetail(); } catch (e) { showError(e); } } }
       }, 'удалить');
       table.append(el('tr', {}, el('td', {}, p.label), el('td', {}, fmtMoney(periodTotal(p))), el('td', {}, edit), el('td', {}, del)));
     }
     hist.append(table);
   }
 
-  const newBtn = el('button', { class: 'btn', onclick: () => renderPeriodForm(null) }, '+ Новый месяц');
-  const settingsBtn = el('button', { class: 'btn secondary', onclick: renderObjectSettings }, 'Настройки объекта');
+  const newBtn = el('button', { class: 'btn', onclick: () => go(`#/object/${o.id}/period/new`) }, '+ Новый месяц');
+  const settingsBtn = el('button', { class: 'btn secondary', onclick: () => go(`#/object/${o.id}/settings`) }, 'Настройки объекта');
   app.append(el('div', { class: 'row', style: 'margin-bottom:14px' }, newBtn, settingsBtn), hist);
 }
 
@@ -183,16 +225,23 @@ async function ensureDefaultItems(o) {
 }
 
 // ---------- period form ----------
-function renderPeriodForm(period) {
+// periodId: uuid существующего периода, 'new' или null
+async function renderPeriodForm(periodId) {
   const o = state.object;
   app.innerHTML = '';
-  app.append(el('button', { class: 'back', onclick: renderObjectDetail }, `← ${o.name}`));
+  app.append(el('button', { class: 'back', onclick: () => go(`#/object/${o.id}`) }, o.name));
+  try {
+    if (!state.items) state.items = await DB.listItems(o.id);
+    if (periodId && periodId !== 'new' && !state.data) state.data = await DB.loadObjectData(o.id);
+  } catch (err) { return showError(err); }
+  const period = periodId && periodId !== 'new'
+    ? (state.data || []).find(p => p.id === periodId) : null;
   app.append(el('h1', {}, period ? `Изменить: ${period.label}` : 'Новый месяц'));
 
   const year = el('input', { type: 'number', inputmode: 'numeric', value: period?.year || new Date().getFullYear() });
   const label = el('input', { value: period?.label || '', placeholder: 'Октябрь или Август + Сентябрь' });
   const sugg = el('div', { class: 'row', style: 'margin-top:6px' });
-  MONTHS.forEach(m => sugg.append(el('button', { class: 'btn secondary', style: 'padding:6px 10px;font-size:13px', onclick: () => { label.value = m; updateTotal(); } }, m)));
+  MONTHS.forEach(m => sugg.append(el('button', { class: 'btn secondary small', onclick: () => { label.value = m; } }, m)));
 
   const itemInputs = {};
   const cardItems = el('div', { class: 'card' }, el('h2', {}, 'Платежи по квитанции'));
@@ -240,7 +289,8 @@ function renderPeriodForm(period) {
           const v = parseFloat((inp.value || '').replace(',', '.'));
           if (!isNaN(v)) await DB.upsertReading({ period_id: pid, kind, zone, value: v });
         }
-        await renderObjectDetail();
+        state.data = null;
+        go(`#/object/${o.id}`);
       } catch (err) { showError(err); }
     }
   }, 'Сохранить');
@@ -257,42 +307,105 @@ function renderPeriodForm(period) {
   updateTotal();
 }
 
-// ---------- object settings ----------
-function renderObjectSettings() {
+// ---------- object settings (в т.ч. свои статьи: добавить/переименовать/удалить) ----------
+async function renderObjectSettings() {
   const o = state.object;
   app.innerHTML = '';
-  app.append(el('button', { class: 'back', onclick: renderObjectDetail }, `← ${o.name}`));
+  app.append(el('button', { class: 'back', onclick: () => go(`#/object/${o.id}`) }, o.name));
   app.append(el('h1', {}, 'Настройки объекта'));
+  try {
+    if (!state.items) state.items = await DB.listItems(o.id);
+  } catch (err) { return showError(err); }
 
   const name = el('input', { value: o.name });
   const split = el('input', { type: 'checkbox' }); split.checked = o.split_water;
-  const checks = {};
-  const cardItems = el('div', { class: 'card' }, el('h2', {}, 'Статьи платежей'));
-  for (const [key, title] of ITEM_CATALOG) {
-    const cb = el('input', { type: 'checkbox' });
-    cb.checked = state.items.some(i => i.key === key);
-    checks[key] = cb;
-    cardItems.append(el('label', { class: 'chk' }, cb, title));
+
+  // локальные копии для редактирования списка статей
+  const items = state.items.map(i => ({ ...i }));
+  const removed = new Set();
+
+  const itemsCard = el('div', { class: 'card' }, el('h2', {}, 'Статьи платежей'));
+  const listBox = el('div', {});
+  itemsCard.append(listBox);
+
+  function refreshList() {
+    listBox.innerHTML = '';
+    items.filter(i => !removed.has(i.id)).forEach((item, idx) => {
+      const titleInp = el('input', { value: item.title, oninput: () => { item.title = titleInp.value; } });
+      const up = el('button', { class: 'link', title: 'Выше', onclick: () => { if (idx > 0) { const vis = items.filter(i => !removed.has(i.id)); const a = vis[idx], b = vis[idx - 1]; const ia = items.indexOf(a), ib = items.indexOf(b); [items[ia], items[ib]] = [items[ib], items[ia]]; refreshList(); } } }, '↑');
+      const down = el('button', { class: 'link', title: 'Ниже', onclick: () => { const vis = items.filter(i => !removed.has(i.id)); if (idx < vis.length - 1) { const a = vis[idx], b = vis[idx + 1]; const ia = items.indexOf(a), ib = items.indexOf(b); [items[ia], items[ib]] = [items[ib], items[ia]]; refreshList(); } } }, '↓');
+      const del = el('button', { class: 'link', style: 'color:var(--danger)', onclick: () => { removed.add(item.id); refreshList(); } }, 'удалить');
+      listBox.append(el('div', { class: 'item-row' }, titleInp, up, down, del));
+    });
+    if (!items.filter(i => !removed.has(i.id)).length) listBox.append(el('div', { class: 'muted' }, 'Статей нет — добавьте хотя бы одну ниже.'));
   }
+  refreshList();
+
+  // добавление стандартной статьи из справочника
+  const usedKeys = () => new Set(items.filter(i => !removed.has(i.id)).map(i => i.key));
+  const stdSel = el('select', {});
+  function refreshStd() {
+    stdSel.innerHTML = '';
+    const used = usedKeys();
+    const avail = ITEM_CATALOG.filter(([k]) => !used.has(k));
+    if (!avail.length) { stdSel.append(el('option', { value: '' }, '— все стандартные добавлены —')); return; }
+    avail.forEach(([k, t]) => stdSel.append(el('option', { value: k }, t)));
+  }
+  refreshStd();
+  const addStd = () => {
+    if (!stdSel.value) return;
+    const t = ITEM_CATALOG.find(([k]) => k === stdSel.value)[1];
+    items.push({ id: null, key: stdSel.value, title: t });
+    refreshList(); refreshStd();
+  };
+
+  // добавление своей статьи
+  const customInp = el('input', { placeholder: 'Название своей статьи, напр. «Интернет»' });
+  const addCustom = () => {
+    const t = customInp.value.trim();
+    if (!t) return;
+    const slug = 'custom_' + Date.now().toString(36);
+    items.push({ id: null, key: slug, title: t });
+    customInp.value = '';
+    refreshList(); refreshStd();
+  };
+
+  itemsCard.append(
+    el('div', { class: 'row', style: 'margin-top:12px;align-items:center' },
+      el('div', { style: 'flex:2' }, stdSel), el('button', { class: 'btn secondary small', onclick: addStd }, 'Добавить')),
+    el('div', { class: 'row', style: 'margin-top:8px;align-items:center' },
+      el('div', { style: 'flex:2' }, customInp), el('button', { class: 'btn secondary small', onclick: addCustom }, 'Своя статья'))
+  );
 
   app.append(
     el('div', { class: 'card' },
       el('label', {}, 'Название'), name,
-      el('label', { class: 'chk' }, split, 'Разделять воду на кухня/ванная'),
-      cardItems),
+      el('label', { class: 'chk' }, split, 'Разделять воду на кухня/ванная')),
+    itemsCard,
     el('button', {
       class: 'btn', onclick: async () => {
         try {
           await DB.updateObject(o.id, { name: name.value.trim(), split_water: split.checked });
-          for (const [key, title] of ITEM_CATALOG) {
-            const existing = state.items.find(i => i.key === key);
-            if (checks[key].checked && !existing) await DB.upsertItem({ object_id: o.id, key, title, sort_order: ITEM_CATALOG.findIndex(c => c[0] === key) });
-            if (!checks[key].checked && existing) await DB.deleteItem(existing.id);
+          // удалённые
+          for (const id of removed) await DB.deleteItem(id);
+          // переименованные / новые порядок
+          const visible = items.filter(i => !removed.has(i.id));
+          for (let i = 0; i < visible.length; i++) {
+            const it = visible[i];
+            if (it.id) {
+              const orig = state.items.find(x => x.id === it.id);
+              if (orig.title !== it.title || orig.sort_order !== i) {
+                await DB.upsertItem({ object_id: o.id, key: it.key, title: it.title, sort_order: i });
+              }
+            } else {
+              await DB.upsertItem({ object_id: o.id, key: it.key, title: it.title, sort_order: i });
+            }
           }
           o.name = name.value.trim(); o.split_water = split.checked;
           state.items = await DB.listItems(o.id);
           await loadObjects();
-          renderObjectDetail();
+          state.data = null;
+          go(`#/object/${o.id}`);
         } catch (err) { showError(err); }
       }
     }, 'Сохранить')
@@ -308,17 +421,36 @@ async function renderReports() {
   const monthSel = el('select', {});
   monthSel.append(el('option', { value: '' }, 'Весь год'));
   MONTHS.forEach((m, i) => monthSel.append(el('option', { value: i + 1 }, m)));
-  const objSel = el('select', {});
-  objSel.append(el('option', { value: '' }, 'Все объекты'));
-  for (const o of state.objects) objSel.append(el('option', { value: o.name }, o.name));
-  const go = el('button', { class: 'btn', onclick: showReport, style: 'margin-top:22px' }, 'Показать');
+
+  // мультивыбор объектов галочками
+  const allChk = el('input', { type: 'checkbox' });
+  allChk.checked = true;
+  const objChks = {};
+  const objBox = el('div', { class: 'chk-grid' });
+  for (const o of state.objects) {
+    const cb = el('input', { type: 'checkbox' });
+    cb.checked = true;
+    objChks[o.name] = cb;
+    cb.addEventListener('change', () => {
+      if (!cb.checked) allChk.checked = false;
+      else if (Object.values(objChks).every(c => c.checked)) allChk.checked = true;
+    });
+    objBox.append(el('label', { class: 'chk' }, cb, o.name));
+  }
+  allChk.addEventListener('change', () => {
+    for (const c of Object.values(objChks)) c.checked = allChk.checked;
+  });
+
+  const goBtn = el('button', { class: 'btn', onclick: showReport, style: 'margin-top:16px' }, 'Показать');
   const out = el('div', {});
   app.append(el('div', { class: 'card' },
     el('div', { class: 'row' },
       el('div', {}, el('label', {}, 'Год'), yearInp),
-      el('div', {}, el('label', {}, 'Период'), monthSel),
-      el('div', {}, el('label', {}, 'Объект'), objSel)),
-    go), out);
+      el('div', {}, el('label', {}, 'Период'), monthSel)),
+    el('label', {}, 'Объекты'),
+    el('label', { class: 'chk' }, allChk, 'Все объекты'),
+    objBox,
+    goBtn), out);
 
   const monthOf = (p) => Math.round((p.sort_key - p.year) * 100);
 
@@ -327,22 +459,24 @@ async function renderReports() {
     try {
       const y = parseInt(yearInp.value, 10);
       const mFilter = monthSel.value ? parseInt(monthSel.value, 10) : null;
-      const oFilter = objSel.value;
-      let periods = await DB.allPeriodsWithPayments(y);
+      const activeNames = Object.entries(objChks).filter(([, c]) => c.checked).map(([n]) => n);
+      const periodName = mFilter ? `${MONTHS[mFilter - 1]} ${y}` : `${y} год`;
+      if (!activeNames.length) { out.append(el('div', { class: 'card muted' }, 'Отметьте хотя бы один объект')); return; }
+
+      let periods = (await DB.allPeriodsWithPayments(y))
+        .filter(p => activeNames.includes(p.objects?.name));
       if (mFilter) periods = periods.filter(p => monthOf(p) === mFilter);
-      if (oFilter) periods = periods.filter(p => p.objects?.name === oFilter);
 
       const byObject = {};
       for (const p of periods) {
         const name = p.objects?.name || '?';
         byObject[name] = (byObject[name] || 0) + periodTotal(p);
       }
-      const names = Object.keys(byObject);
-      const periodName = mFilter ? `${MONTHS[mFilter - 1]} ${y}` : `${y} год`;
+      const names = activeNames.filter(n => byObject[n] !== undefined);
       if (!names.length) { out.append(el('div', { class: 'card muted' }, `Нет данных: ${periodName}`)); return; }
 
       const table = el('table');
-      table.append(el('tr', {}, el('th', {}, 'Объект'), el('th', {}, `Итого, ₽`)));
+      table.append(el('tr', {}, el('th', {}, 'Объект'), el('th', {}, 'Итого, ₽')));
       let sum = 0;
       names.forEach(n => { sum += byObject[n]; table.append(el('tr', {}, el('td', {}, n), el('td', {}, fmtMoney(byObject[n])))); });
       table.append(el('tr', { class: 'total' }, el('td', {}, 'Всего'), el('td', {}, fmtMoney(sum))));
@@ -352,12 +486,12 @@ async function renderReports() {
       out.append(el('div', { class: 'card' }, cv));
       drawBars(cv, names, names.map(n => byObject[n]), `Итого: ${periodName}, ₽`);
 
-      // динамика по объекту (за год, если выбран месяц — только этот месяц по годам нет, берём год)
-      const dynObj = oFilter || names[0];
+      // динамика: первый отмеченный объект
+      const dynObj = activeNames[0];
       const list = (await DB.allPeriodsWithPayments(y))
         .filter(p => p.objects?.name === dynObj)
         .sort((a, b) => a.sort_key - b.sort_key);
-      const labels = list.map(p => p.label.length > 12 ? p.label.slice(0, 11) + '…' : p.label);
+      const labels = list.map(p => p.label);
       const dynCard = el('div', { class: 'card' }, el('h2', {}, `Динамика: ${dynObj}`), el('canvas', {}));
       out.append(dynCard);
       drawLine(dynCard.querySelector('canvas'), labels, list.map(periodTotal), `${dynObj}, ${y} год, ₽/месяц`);
