@@ -18,7 +18,7 @@ def req(method, url, payload=None):
 
 # файлы: отслеживаемые git'ом, исключая openspec и служебное
 files = subprocess.check_output(["git", "ls-files"], text=True).split()
-skip_prefixes = ("openspec/",)
+skip_prefixes = (".hermes/",)
 files = [f for f in files if not f.startswith(skip_prefixes)]
 print("deploy files:", files)
 
