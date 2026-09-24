@@ -30,7 +30,7 @@ if os.path.exists(idx_path):
             h = hashlib.sha256(open(path, "rb").read()).hexdigest()[:8]
             return f"{path}?v={h}"
         return m.group(0)
-    html = re.sub(r"(css/style\.css|js/[\w.]+)\?v=[^\"']+", bump, html)
+    html = re.sub(r"(css/[\w.-]+\.css|js/[\w.-]+\.js)\?v=[^\"']+", bump, html)
     open(idx_path, "w", encoding="utf-8", newline="\n").write(html)
     # важно: обновлённый index.html должен попасть в индекс, иначе уедет старая версия
     # со старыми ?v= (браузер подтянет устаревшие js/css)
