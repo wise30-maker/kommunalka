@@ -54,6 +54,51 @@ function showError(err) {
   window.scrollTo(0, 0);
 }
 
+// ---------- «поделиться»: системное меню (мессенджеры, почта, заметки) ----------
+async function shareText(title, text) {
+  if (navigator.share) {
+    try { await navigator.share({ title, text }); return 'поделились'; }
+    catch (e) { if (e && e.name === 'AbortError') return 'отменено'; }
+  }
+  try { await navigator.clipboard.writeText(text); return 'скопировано в буфер обмена'; }
+  catch {
+    const ta = el('textarea', { style: 'position:fixed;top:-1000px' });
+    ta.value = text;
+    document.body.append(ta);
+    ta.select();
+    const ok = document.execCommand && document.execCommand('copy');
+    ta.remove();
+    return ok ? 'скопировано в буфер обмена' : 'не удалось поделиться — текст в отчёте';
+  }
+}
+
+async function shareCanvas(canvas, title) {
+  if (!canvas || !canvas.toBlob) return 'нечего отправить';
+  const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+  if (!blob) return 'не удалось подготовить картинку';
+  const file = new File([blob], 'kommunalka.png', { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+    try { await navigator.share({ title, files: [file] }); return 'поделились картинкой'; }
+    catch (e) { if (e && e.name === 'AbortError') return 'отменено'; }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = el('a', { href: url, download: 'kommunalka.png' });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  return 'картинка сохранена в загрузки';
+}
+
+function shareRow(actions) {
+  const status = el('div', { class: 'muted', style: 'font-size:13px;margin-top:8px' });
+  const btns = actions.map(a => el('button', {
+    class: a.secondary ? 'btn secondary small' : 'btn small', type: 'button',
+    onclick: async () => { status.textContent = '…'; status.textContent = await a.run(); }
+  }, a.title));
+  return el('div', {}, el('div', { class: 'row', style: 'margin-top:12px' }, btns), status);
+}
+
 // ---------- hash router ----------
 // fwdStack — стек «вперёд»: свайп вправо кладёт текущий экран в стек,
 // свайп влево возвращает его (навигация как в iOS, без выхода из приложения)
@@ -384,9 +429,27 @@ async function renderPeriodForm(periodId) {
   const year = el('select', {});
   yearList.forEach(y => year.append(el('option', { value: y }, String(y))));
   year.value = String(periodYear);
-  const label = el('input', { value: period?.label || MONTHS[now0.getMonth()], placeholder: 'Октябрь или Август + Сентябрь' });
-  const sugg = el('div', { class: 'row', style: 'margin-top:6px' });
-  MONTHS.forEach(m => sugg.append(el('button', { class: 'btn secondary small', onclick: () => { label.value = m; } }, m)));
+  // период выбирается списком (как год); для склеенных месяцев остаётся «свой период»
+  const monthSel = el('select', {});
+  MONTHS.forEach(m => monthSel.append(el('option', { value: m }, m)));
+  const preset = period?.label || MONTHS[now0.getMonth()];
+  const isCustomPreset = !MONTHS.includes(preset);
+  if (isCustomPreset) monthSel.append(el('option', { value: preset }, preset));
+  monthSel.value = preset;
+  const customInp = el('input', {
+    value: isCustomPreset ? preset : '',
+    placeholder: 'Август + Сентябрь',
+    style: 'margin-top:6px;' + (isCustomPreset ? '' : 'display:none')
+  });
+  const customToggle = el('button', {
+    class: 'link', type: 'button', onclick: () => {
+      const hidden = customInp.style.display === 'none';
+      customInp.style.display = hidden ? 'block' : 'none';
+      if (hidden) { customInp.focus(); } else { customInp.value = ''; }
+    }
+  }, 'свой период (несколько месяцев)');
+  const labelValue = () =>
+    (customInp.style.display === 'none' ? monthSel.value : (customInp.value.trim() || monthSel.value));
 
   const itemInputs = {};
   const cardItems = el('div', { class: 'card' }, el('h2', {}, 'Платежи по квитанции'));
@@ -547,8 +610,8 @@ async function renderPeriodForm(periodId) {
     class: 'btn', onclick: async () => {
       try {
         const y = parseInt(year.value, 10);
-        if (!y || !label.value.trim()) throw new Error('Укажите год и название периода');
-        const [saved] = await DB.upsertPeriod({ object_id: o.id, year: y, label: label.value.trim(), sort_key: labelSortKey(y, label.value) });
+        if (!y || !labelValue()) throw new Error('Укажите год и период');
+        const [saved] = await DB.upsertPeriod({ object_id: o.id, year: y, label: labelValue(), sort_key: labelSortKey(y, labelValue()) });
         const pid = period?.id || saved.id;
         for (const item of state.items) {
           const v = parseFloat((itemInputs[item.id].value || '').replace(',', '.'));
@@ -570,8 +633,9 @@ async function renderPeriodForm(periodId) {
     el('div', { class: 'card' },
       el('div', { class: 'row' },
         el('div', {}, el('label', {}, 'Год'), year),
-        el('div', { style: 'flex:2' }, el('label', {}, 'Период'), label)),
-      sugg),
+        el('div', { style: 'flex:2' }, el('label', {}, 'Период'), monthSel)),
+      customInp,
+      el('div', { style: 'margin-top:6px' }, customToggle)),
     cardOcr, cardItems, totalDiv, cardRead,
     el('div', { style: 'margin:14px 0' }, save)
   );
@@ -796,10 +860,25 @@ async function renderReports() {
       let sum = 0;
       names.forEach(n => { sum += byObject[n]; table.append(el('tr', {}, el('td', {}, n), el('td', {}, fmtMoney(byObject[n])))); });
       table.append(el('tr', { class: 'total' }, el('td', {}, 'Всего'), el('td', {}, fmtMoney(sum))));
-      out.append(el('div', { class: 'card' }, el('h2', {}, `Итоги: ${periodName}`), table));
+
+      // текст отчёта — им делимся в мессенджеры, почту и т.п.
+      const reportText = [`Итоги: ${periodName}`, '']
+        .concat(names.map(n => `${n} — ${fmtMoney(byObject[n])} ₽`))
+        .concat(['', `Всего — ${fmtMoney(sum)} ₽`])
+        .join('\n');
+
+      out.append(el('div', { class: 'card' },
+        el('h2', {}, `Итоги: ${periodName}`),
+        table,
+        shareRow([
+          { title: '📤 Поделиться отчётом', run: () => shareText(`Итоги: ${periodName}`, reportText) }
+        ])));
 
       const cv = el('canvas', {});
-      out.append(el('div', { class: 'card' }, cv));
+      out.append(el('div', { class: 'card' }, cv,
+        shareRow([
+          { title: '📤 Поделиться графиком', run: () => shareCanvas(cv, `Итого: ${periodName}`) }
+        ])));
       drawBars(cv, names, names.map(n => byObject[n]), `Итого: ${periodName}, ₽`);
 
       // динамика: первый отмеченный объект
@@ -808,9 +887,13 @@ async function renderReports() {
         .filter(p => p.objects?.name === dynObj)
         .sort((a, b) => a.sort_key - b.sort_key);
       const labels = list.map(p => p.label);
-      const dynCard = el('div', { class: 'card' }, el('h2', {}, `Динамика: ${dynObj}`), el('canvas', {}));
+      const dynCv = el('canvas', {});
+      const dynCard = el('div', { class: 'card' }, el('h2', {}, `Динамика: ${dynObj}`), dynCv,
+        shareRow([
+          { title: '📤 Поделиться графиком', run: () => shareCanvas(dynCv, `Динамика: ${dynObj}, ${y}`) }
+        ]));
       out.append(dynCard);
-      drawLine(dynCard.querySelector('canvas'), labels, list.map(periodTotal), `${dynObj}, ${y} год, ₽/месяц`);
+      drawLine(dynCv, labels, list.map(periodTotal), `${dynObj}, ${y} год, ₽/месяц`);
     } catch (err) { showError(err); }
   }
 }
