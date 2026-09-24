@@ -407,22 +407,26 @@ async function renderPeriodForm(periodId) {
       + (res.total !== null ? `, в квитанции «К оплате» ${fmtMoney(res.total)} ₽ (расхождение ${fmtMoney(res.diff)} ₽)` : ', итог «К оплате» в тексте не найден');
     box.append(head);
 
-    const table = el('table');
-    table.append(el('tr', {}, el('th', {}, 'Получатель'), el('th', {}, 'Статья'), el('th', {}, 'Сумма')));
+    const table = el('table', { class: 'ocr-table' });
+    table.append(el('tr', {}, el('th', {}, 'Получатель и статья'), el('th', {}, 'Сумма')));
     const rowsState = [];
     res.rows.forEach(r => {
       const sel = el('select', {});
-      sel.append(el('option', { value: '' }, '— не выбрано —'));
+      sel.append(el('option', { value: '' }, '— выберите статью —'));
       state.items.forEach(it => {
         const opt = el('option', { value: it.id }, it.title);
         if (it.id === r.itemId) opt.selected = true;
         sel.append(opt);
       });
       const value = r.suspicious ? (r.suggested ?? '') : r.amount;
-      const amt = el('input', { type: 'number', inputmode: 'decimal', step: '0.01', value: value === '' ? '' : String(value) });
-      const payeeCell = el('td', {}, r.payee || '—');
-      if (r.suspicious) payeeCell.append(el('div', { class: 'muted', style: 'font-size:12px' }, 'сумма распознана без копеек — проверьте'));
-      table.append(el('tr', {}, payeeCell, el('td', {}, sel), el('td', {}, amt)));
+      const amt = el('input', { class: 'ocr-amt', type: 'number', inputmode: 'decimal', step: '0.01', value: value === '' ? '' : String(value) });
+
+      // получатель сверху, статья — под ним; сумма остаётся справа
+      const cell = el('td', {}, el('div', { class: 'ocr-payee' }, r.payee || 'получатель не распознан'));
+      if (r.suspicious) cell.append(el('div', { class: 'ocr-note' }, 'сумма распознана без копеек — проверьте'));
+      cell.append(el('div', { class: 'ocr-pick' }, sel));
+
+      table.append(el('tr', {}, cell, el('td', { class: 'ocr-amt-cell' }, amt)));
       rowsState.push({ sel, amt });
     });
     box.append(table);
