@@ -32,6 +32,9 @@ if os.path.exists(idx_path):
         return m.group(0)
     html = re.sub(r"(css/style\.css|js/[\w.]+)\?v=[^\"']+", bump, html)
     open(idx_path, "w", encoding="utf-8", newline="\n").write(html)
+    # важно: обновлённый index.html должен попасть в индекс, иначе уедет старая версия
+    # со старыми ?v= (браузер подтянет устаревшие js/css)
+    subprocess.run(["git", "add", idx_path], check=False)
 
 # --- файлы: отслеживаемые git'ом + локальный js/config.js (gitignored, но нужен на сайте) ---
 files = subprocess.check_output(["git", "ls-files"], text=True).split()
