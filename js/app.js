@@ -366,7 +366,8 @@ async function renderPeriodForm(periodId) {
   app.append(el('button', { class: 'back', onclick: () => go(`#/object/${o.id}`) }, o.name));
   try {
     if (!state.items) state.items = await DB.listItems(o.id);
-    if (periodId && periodId !== 'new' && !state.data) state.data = await DB.loadObjectData(o.id);
+    // данные объекта нужны всегда: и для правки периода, и для подсказок по показаниям
+    if (!state.data) state.data = await DB.loadObjectData(o.id);
   } catch (err) { return showError(err); }
   const period = periodId && periodId !== 'new'
     ? (state.data || []).find(p => p.id === periodId) : null;
@@ -490,6 +491,8 @@ async function renderPeriodForm(periodId) {
     el('div', { class: 'row' }, ocrBtn), fileInp, ocrStatus, ocrOut);
 
   const cardRead = el('div', { class: 'card' }, el('h2', {}, 'Показания счётчиков'));
+  const fmtReading = v => Number(v).toLocaleString('ru-RU', { maximumFractionDigits: 3 });
+
   const readingInputs = [];
   const zones = o.split_water ? [['kitchen', 'Кухня'], ['bath', 'Ванная']] : [[null, '']];
   for (const [kind, kindTitle] of READING_KINDS) {
@@ -497,11 +500,38 @@ async function renderPeriodForm(periodId) {
     for (const [zone, zoneTitle] of kindZones) {
       const existing = period?.meter_readings?.find(r => r.kind === kind && (r.zone ?? null) === zone);
       const inp = el('input', { type: 'number', inputmode: 'decimal', step: 'any', value: existing?.value ?? '', placeholder: '—' });
-      readingInputs.push({ kind, zone, inp });
       const caption = zoneTitle ? `${kindTitle} — ${zoneTitle.toLowerCase()}` : kindTitle;
-      cardRead.append(el('label', {}, caption), inp);
+      // показание за предыдущий месяц — надписью над названием счётчика
+      const prev = Readings.previous(state.data, kind, zone, period?.id);
+      const prevLine = el('div', { class: 'read-prev' },
+        prev ? `предыдущие показания: ${fmtReading(prev.value)}${prev.label ? ' (' + prev.label + ')' : ''}`
+             : 'предыдущих показаний нет');
+      cardRead.append(prevLine, el('label', {}, caption), inp);
+      readingInputs.push({ kind, zone, title: caption, inp, prev });
     }
   }
+
+  const readHint = el('div', { class: 'muted', style: 'font-size:13px;margin-top:8px' });
+  const avgBtn = el('button', {
+    class: 'btn secondary small', type: 'button', onclick: () => {
+      const y = parseInt(year.value, 10);
+      let filled = 0, skipped = 0, unchanged = 0;
+      const noData = [];
+      for (const row of readingInputs) {
+        if (String(row.inp.value).trim() !== '') { skipped++; continue; }   // введённое не трогаем
+        const s = Readings.suggest(state.data, row.kind, row.zone, y, period?.id);
+        if (s.value === null) { noData.push(row.title); continue; }
+        row.inp.value = String(s.value);
+        filled++;
+        if (s.unchanged) unchanged++;
+      }
+      readHint.textContent = `по среднему за ${y} год заполнено: ${filled}`
+        + (unchanged ? ` (без изменений — расход 0: ${unchanged})` : '')
+        + (skipped ? `, пропущено (уже заполнено): ${skipped}` : '')
+        + (noData.length ? `, нет данных для расчёта: ${noData.join(', ')}` : '');
+    }
+  }, 'Заполнить по среднему за год');
+  cardRead.append(el('div', { class: 'row', style: 'margin-top:12px' }, avgBtn), readHint);
 
   const save = el('button', {
     class: 'btn', onclick: async () => {
