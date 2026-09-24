@@ -407,8 +407,10 @@ async function renderPeriodForm(periodId) {
       + (res.total !== null ? `, в квитанции «К оплате» ${fmtMoney(res.total)} ₽ (расхождение ${fmtMoney(res.diff)} ₽)` : ', итог «К оплате» в тексте не найден');
     box.append(head);
 
-    const table = el('table', { class: 'ocr-table' });
-    table.append(el('tr', {}, el('th', {}, 'Получатель и статья'), el('th', {}, 'Сумма')));
+    // строки превью: получатель сверху, под ним статья; сумма — справа, выровнена с полем статьи
+    const headRow = el('div', { class: 'ocr-head' },
+      el('div', {}, 'Получатель и статья'), el('div', {}, 'Сумма'));
+    const rowsBox = el('div', {});
     const rowsState = [];
     res.rows.forEach(r => {
       const sel = el('select', {});
@@ -421,15 +423,15 @@ async function renderPeriodForm(periodId) {
       const value = r.suspicious ? (r.suggested ?? '') : r.amount;
       const amt = el('input', { class: 'ocr-amt', type: 'number', inputmode: 'decimal', step: '0.01', value: value === '' ? '' : String(value) });
 
-      // получатель сверху, статья — под ним; сумма остаётся справа
-      const cell = el('td', {}, el('div', { class: 'ocr-payee' }, r.payee || 'получатель не распознан'));
-      if (r.suspicious) cell.append(el('div', { class: 'ocr-note' }, 'сумма распознана без копеек — проверьте'));
-      cell.append(el('div', { class: 'ocr-pick' }, sel));
+      const main = el('div', { class: 'ocr-cell-main' },
+        el('div', { class: 'ocr-payee' }, r.payee || 'получатель не распознан'));
+      if (r.suspicious) main.append(el('div', { class: 'ocr-note' }, 'сумма распознана без копеек — проверьте'));
+      main.append(el('div', { class: 'ocr-pick' }, sel));
 
-      table.append(el('tr', {}, cell, el('td', { class: 'ocr-amt-cell' }, amt)));
+      rowsBox.append(el('div', { class: 'ocr-row' }, main, el('div', { class: 'ocr-cell-amt' }, amt)));
       rowsState.push({ sel, amt });
     });
-    box.append(table);
+    box.append(headRow, rowsBox);
 
     if (res.problems.length) {
       const list = el('div', { class: 'muted', style: 'margin-top:8px;font-size:13px' });
