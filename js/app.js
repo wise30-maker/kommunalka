@@ -483,21 +483,27 @@ async function renderReports() {
   monthSel.append(el('option', { value: '' }, 'Весь год'));
   MONTHS.forEach((m, i) => monthSel.append(el('option', { value: i + 1 }, m)));
 
-  // мультивыбор объектов — выпадающий список, строки как опции iOS (✓ справа)
+  // мультивыбор объектов — шторка снизу экрана, как системный список iOS
   const allChk = el('input', { type: 'checkbox' });
   allChk.checked = true;
   const objChks = {};
-  const objBox = el('div', { class: 'drop-panel' });
+  const objBox = el('div', { class: 'drop-sheet' });
+  const back = el('div', { class: 'drop-back' });
+  const doneBtn = el('button', { class: 'sheet-done', onclick: () => closeSheet() }, 'Готово');
   const dropBtn = el('button', { class: 'drop-btn', type: 'button' }, 'Все объекты');
   function dropLabel() {
     const checked = Object.values(objChks).filter(c => c.checked).length;
     const total = Object.keys(objChks).length;
     dropBtn.textContent = checked === total ? 'Все объекты' : `Выбрано: ${checked} из ${total}`;
   }
+  function openSheet() { back.style.display = 'block'; objBox.style.display = 'block'; doneBtn.style.display = 'block'; }
+  function closeSheet() { back.style.display = 'none'; objBox.style.display = 'none'; doneBtn.style.display = 'none'; }
   objBox.addEventListener('click', e => e.stopPropagation());
+  doneBtn.addEventListener('click', e => e.stopPropagation());
+  back.addEventListener('click', closeSheet);
   dropBtn.addEventListener('click', e => {
     e.stopPropagation();
-    objBox.style.display = objBox.style.display === 'block' ? 'none' : 'block';
+    if (objBox.style.display === 'block') closeSheet(); else openSheet();
   });
   const pairs = [];
   for (const o of state.objects) {
@@ -530,8 +536,10 @@ async function renderReports() {
       el('div', {}, el('label', {}, 'Год'), yearSel),
       el('div', {}, el('label', {}, 'Период'), monthSel)),
     el('label', {}, 'Объекты'),
-    el('div', { class: 'drop-wrap' }, dropBtn, objBox),
+    el('div', { class: 'drop-wrap' }, dropBtn),
     goBtn), out);
+  // шторка и затемнение — fixed-элементы; app.innerHTML='' при перерисовке их уберёт
+  app.append(back, objBox, doneBtn);
 
   const monthOf = (p) => Math.round((p.sort_key - p.year) * 100);
 

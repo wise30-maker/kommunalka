@@ -84,10 +84,19 @@ canvas{width:100%;background:var(--card);border-radius:12px;touch-action:pan-y}
 .drop-panel{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;
   background:var(--card);border:1px solid var(--border);border-radius:14px;padding:4px 14px;
   box-shadow:var(--panel-shadow);max-height:280px;overflow:auto}
-.drop-panel .chk{display:block;position:relative;padding:12px 30px 12px 2px;border-bottom:1px solid var(--sep);margin:0;cursor:pointer;font-size:16px}
-.drop-panel .chk:last-child{border-bottom:none}
-.drop-panel .chk input{position:absolute;opacity:0;pointer-events:none}
-.drop-panel .chk::after{content:"✓";position:absolute;right:4px;top:50%;transform:translateY(-50%);
+.drop-panel .chk,.drop-sheet .chk{display:block;position:relative;padding:14px 30px 14px 2px;border-bottom:1px solid var(--sep);margin:0;cursor:pointer;font-size:17px}
+.drop-panel .chk:last-child,.drop-sheet .chk:last-child{border-bottom:none}
+.drop-panel .chk input,.drop-sheet .chk input{position:absolute;opacity:0;pointer-events:none}
+.drop-panel .chk::after,.drop-sheet .chk::after{content:"✓";position:absolute;right:4px;top:50%;transform:translateY(-50%);
   font-size:17px;font-weight:600;color:var(--accent);opacity:0;transition:opacity .12s}
-.drop-panel .chk.on::after{opacity:1}
+.drop-panel .chk.on::after,.drop-sheet .chk.on::after{opacity:1}
+/* шторка выбора объектов — как системный список iOS (затемнение + лист снизу + «Готово») */
+.drop-back{display:none;position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:40}
+.drop-sheet{display:none;position:fixed;left:10px;right:10px;bottom:76px;z-index:41;
+  background:var(--card);border-radius:16px;padding:6px 16px;max-height:55vh;overflow:auto;
+  box-shadow:var(--panel-shadow);animation:sheetUp .18s ease-out}
+.sheet-done{display:none;position:fixed;left:10px;right:10px;bottom:12px;z-index:41;height:50px;
+  border:none;border-radius:14px;background:var(--accent);color:var(--accent-fg);
+  font-size:17px;font-weight:600;cursor:pointer;animation:sheetUp .18s ease-out}
+@keyframes sheetUp{from{transform:translateY(20px);opacity:.3}to{transform:none;opacity:1}}
 @media(max-width:600px){main{padding:12px 12px 32px}h1{font-size:22px}th,td{padding:8px 4px;font-size:14px}}
