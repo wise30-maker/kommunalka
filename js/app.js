@@ -471,44 +471,17 @@ async function renderObjectSettings() {
 }
 
 // ---------- reports ----------
-// единый кастомный выпадающий список: поле и строки — как у «Объектов» (iOS, ✓ справа)
-function makeDrop(name, options, initial) {
-  const btn = el('button', { class: 'drop-btn', type: 'button' });
-  const panel = el('div', { class: 'drop-panel' });
-  const wrap = el('div', { class: 'drop-wrap' }, btn, panel);
-  const rows = {};
-  let value = initial;
-  const labelOf = v => (options.find(o => String(o.value) === String(v)) || options[0]).label;
-  function refresh() {
-    btn.textContent = labelOf(value);
-    for (const [v, row] of Object.entries(rows)) row.classList.toggle('on', String(v) === String(value));
-  }
-  panel.addEventListener('click', e => e.stopPropagation());
-  btn.addEventListener('click', e => {
-    e.stopPropagation();
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-  });
-  for (const o of options) {
-    const inp = el('input', { type: 'radio', name });
-    inp.checked = String(o.value) === String(value);
-    const row = el('label', { class: 'chk' + (inp.checked ? ' on' : '') }, inp, o.label);
-    inp.addEventListener('change', () => { value = o.value; refresh(); panel.style.display = 'none'; });
-    rows[o.value] = row;
-    panel.append(row);
-  }
-  refresh();
-  return { wrap, get value() { return value; } };
-}
-
 async function renderReports() {
   app.innerHTML = '';
   app.append(el('h1', {}, 'Отчёты'));
   const now = new Date();
   const curYear = now.getFullYear();
-  const yearOpts = [];
-  for (let y = curYear + 1; y >= curYear - 10; y--) yearOpts.push({ value: y, label: String(y) });
-  const ddYear = makeDrop('dd-year', yearOpts, curYear);
-  const ddPeriod = makeDrop('dd-period', [{ value: '', label: 'Весь год' }, ...MONTHS.map((m, i) => ({ value: i + 1, label: m }))], '');
+  const yearSel = el('select', {});
+  for (let y = curYear + 1; y >= curYear - 10; y--) yearSel.append(el('option', { value: y }, String(y)));
+  yearSel.value = String(curYear);
+  const monthSel = el('select', {});
+  monthSel.append(el('option', { value: '' }, 'Весь год'));
+  MONTHS.forEach((m, i) => monthSel.append(el('option', { value: i + 1 }, m)));
 
   // мультивыбор объектов — выпадающий список, строки как опции iOS (✓ справа)
   const allChk = el('input', { type: 'checkbox' });
@@ -554,8 +527,8 @@ async function renderReports() {
   const out = el('div', {});
   app.append(el('div', { class: 'card' },
     el('div', { class: 'row' },
-      el('div', {}, el('label', {}, 'Год'), ddYear.wrap),
-      el('div', {}, el('label', {}, 'Период'), ddPeriod.wrap)),
+      el('div', {}, el('label', {}, 'Год'), yearSel),
+      el('div', {}, el('label', {}, 'Период'), monthSel)),
     el('label', {}, 'Объекты'),
     el('div', { class: 'drop-wrap' }, dropBtn, objBox),
     goBtn), out);
@@ -565,8 +538,8 @@ async function renderReports() {
   async function showReport() {
     out.innerHTML = '';
     try {
-      const y = parseInt(ddYear.value, 10);
-      const mFilter = ddPeriod.value === '' ? null : parseInt(ddPeriod.value, 10);
+      const y = parseInt(yearSel.value, 10);
+      const mFilter = monthSel.value ? parseInt(monthSel.value, 10) : null;
       const activeNames = Object.entries(objChks).filter(([, c]) => c.checked).map(([n]) => n);
       const periodName = mFilter ? `${MONTHS[mFilter - 1]} ${y}` : `${y} год`;
       if (!activeNames.length) { out.append(el('div', { class: 'card muted' }, 'Отметьте хотя бы один объект')); return; }
