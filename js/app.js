@@ -373,9 +373,17 @@ async function renderPeriodForm(periodId) {
     ? (state.data || []).find(p => p.id === periodId) : null;
   app.append(el('h1', {}, period ? `Изменить: ${period.label}` : 'Новый месяц'));
 
-  const year = el('input', { type: 'number', inputmode: 'numeric', value: period?.year || new Date().getFullYear() });
-  // новый месяц: подставляем текущий месяц, чтобы не вводить его руками
+  // новый месяц: подставляем текущий месяц, год — выпадающим списком
   const now0 = new Date();
+  const curYear0 = now0.getFullYear();
+  const yearList = [];
+  for (let y = curYear0 + 1; y >= curYear0 - 6; y--) yearList.push(y);
+  const periodYear = period?.year || curYear0;
+  if (!yearList.includes(periodYear)) yearList.push(periodYear);
+  yearList.sort((a, b) => b - a);
+  const year = el('select', {});
+  yearList.forEach(y => year.append(el('option', { value: y }, String(y))));
+  year.value = String(periodYear);
   const label = el('input', { value: period?.label || MONTHS[now0.getMonth()], placeholder: 'Октябрь или Август + Сентябрь' });
   const sugg = el('div', { class: 'row', style: 'margin-top:6px' });
   MONTHS.forEach(m => sugg.append(el('button', { class: 'btn secondary small', onclick: () => { label.value = m; } }, m)));
