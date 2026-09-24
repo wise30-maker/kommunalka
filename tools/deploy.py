@@ -43,17 +43,24 @@ base_sha = req("GET", f"{API}/git/ref/heads/main")["object"]["sha"]
 tree_info = req("GET", f"{API}/git/trees/{base_sha}?recursive=1")
 remote_sha = {t["path"]: t["sha"] for t in tree_info.get("tree", []) if t.get("type") == "blob"}
 
-def local_git_sha(path):
-    return subprocess.check_output(["git", "hash-object", path], text=True).strip()
+# sha и содержимое берём из индекса git (канонический вид, LF) — тогда сравнение
+# с репозиторием стабильно и не зависит от autocrlf/CRLF в рабочей копии
+staged = {}
+for line in subprocess.check_output(["git", "ls-files", "-s"], text=True).splitlines():
+    meta, path = line.split("\t", 1)
+    staged[path] = meta.split()[1]
+
+def staged_bytes(path):
+    return subprocess.check_output(["git", "cat-file", "blob", f":{path}"])
 
 uploaded, skipped = [], []
 for p in files:
-    if not os.path.exists(p):
-        print("нет файла, пропуск:", p); continue
-    if remote_sha.get(p) == local_git_sha(p):
+    if p not in staged:
+        print("нет в индексе, пропуск:", p); continue
+    if remote_sha.get(p) == staged[p]:
         skipped.append(p); continue
     b = req("POST", f"{API}/git/blobs",
-            {"content": base64.b64encode(open(p, "rb").read()).decode(), "encoding": "base64"})
+            {"content": base64.b64encode(staged_bytes(p)).decode(), "encoding": "base64"})
     uploaded.append({"path": p, "mode": "100644", "type": "blob", "sha": b["sha"]})
 
 print(f"загружено: {len(uploaded)}, без изменений: {len(skipped)}")
