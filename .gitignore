@@ -2,3 +2,5 @@ js/config.js
 *.local
 node_modules/
 .DS_Store
+rus.traineddata
+/rus_*.gz

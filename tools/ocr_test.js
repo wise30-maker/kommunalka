@@ -23,7 +23,10 @@ const VARIANTS = [
 ];
 
 (async () => {
-  const worker = await createWorker('rus', 1, { langPath: VENDOR, corePath: VENDOR, gzip: true });
+  // cachePath — во временный каталог: иначе tesseract.js распаковывает языковой файл
+  // рядом с рабочей копией (в корень проекта)
+  const cachePath = require('os').tmpdir();
+  const worker = await createWorker('rus', 1, { langPath: VENDOR, corePath: VENDOR, gzip: true, cachePath });
   const list = ONLY ? VARIANTS.filter(v => v.psm === ONLY) : VARIANTS;
   for (const v of list) {
     await worker.setParameters({ tessedit_pageseg_mode: v.psm });
