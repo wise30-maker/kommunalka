@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проверка OCR — Коммуналка</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+  <h1>Проверка распознавания</h1>
+  <div class="card">
+    <p class="muted">Служебная страница: распознаёт выбранное изображение локально в браузере
+    (Tesseract.js + русский пакет из этого же сайта). Ничего не отправляется на сервер.</p>
+    <label>Изображение квитанции</label>
+    <input type="file" id="file" accept="image/*">
+    <div id="status" class="muted" style="margin-top:10px">ожидание файла…</div>
+  </div>
+  <div class="card">
+    <h2>Предобработка</h2>
+    <canvas id="preview" style="max-width:100%;border-radius:12px"></canvas>
+  </div>
+  <div class="card">
+    <h2>Распознанный текст</h2>
+    <pre id="text" style="white-space:pre-wrap;font-size:14px;margin:0"></pre>
+  </div>
+</main>
+
+<script src="vendor/tesseract/tesseract.min.js"></script>
+<script>
+const statusEl = document.getElementById('status');
+const textEl = document.getElementById('text');
+const canvas = document.getElementById('preview');
+let worker = null;
+
+// предобработка: масштаб до 1600px по большей стороне, grayscale + контраст
+function preprocess(img) {
+  const maxSide = 1600;
+  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+  const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  const data = ctx.getImageData(0, 0, w, h);
+  const px = data.data;
+  for (let i = 0; i < px.length; i += 4) {
+    let g = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+    g = Math.max(0, Math.min(255, (g - 128) * 1.35 + 128)); // контраст
+    px[i] = px[i + 1] = px[i + 2] = g;
+  }
+  ctx.putImageData(data, 0, 0);
+  return { w, h };
+}
+
+async function ensureWorker() {
+  if (worker) return worker;
+  statusEl.textContent = 'загружаю движок OCR (~5 МБ, только в первый раз)…';
+  worker = await Tesseract.createWorker('rus', 1, {
+    workerPath: 'vendor/tesseract/worker.min.js',
+    corePath: 'vendor/tesseract/',
+    langPath: 'vendor/tesseract',
+    logger: m => { if (m.status) statusEl.textContent = m.status + ' — ' + Math.round((m.progress || 0) * 100) + '%'; }
+  });
+  // PSM 11 (разрозненный текст) — проверено на скриншоте квитанции: все суммы и итог
+  // распознаются точнее, чем в режиме по умолчанию
+  await worker.setParameters({ tessedit_pageseg_mode: '11' });
+  return worker;
+}
+
+document.getElementById('file').addEventListener('change', async (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  textEl.textContent = '';
+  try {
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i); i.onerror = rej;
+      i.src = URL.createObjectURL(f);
+    });
+    const { w, h } = preprocess(img);
+    statusEl.textContent = 'изображение подготовлено: ' + w + '×' + h;
+    const t0 = Date.now();
+    const w2 = await ensureWorker();
+    const { data } = await w2.recognize(canvas);
+    const secs = ((Date.now() - t0) / 1000).toFixed(1);
+    textEl.textContent = data.text.trim() || '(текст не распознан)';
+    statusEl.textContent = 'готово за ' + secs + ' с; строк: ' + (data.text.trim().split('\n').length);
+  } catch (err) {
+    statusEl.textContent = 'ОШИБКА: ' + (err && err.message ? err.message : err);
+    console.error(err);
+  }
+});
+</script>
+</body>
+</html>

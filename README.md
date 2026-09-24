@@ -43,6 +43,18 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/winocr.ps1 -Path "C:\�
 Вывод пишется в UTF-8 (иначе кириллица ломается в консоли). Служит стендом для отладки
 парсера `js/receipt-parse.js` на реальных скриншотах.
 
+`tools/ocr_test.js` — прогон того же движка, что на сайте (Tesseract.js из `vendor/`), по
+изображению с перебором режимов сегментации. Нужен установленный рядом `tesseract.js`:
+
+```
+npm install tesseract.js@5
+NODE_PATH=<каталог>/node_modules node tools/ocr_test.js путь/к/квитанции.png      # перебор PSM
+NODE_PATH=<каталог>/node_modules node tools/ocr_test.js путь/к/квитанции.png 11   # один режим, полный текст
+```
+
+Рабочий режим для квитанций — **PSM 11** (разрозненный текст): на тестовом скриншоте он единственный
+верно распознал и все пять сумм, и итог «К оплате 8 292,04 ₽».
+
 ## Токены
 
 Файлы `js/config.js` и любые токены НЕ коммитятся (см. `.gitignore`).
