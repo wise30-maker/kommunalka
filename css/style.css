@@ -82,8 +82,12 @@ canvas{width:100%;background:var(--card);border-radius:12px;touch-action:pan-y}
 .drop-wrap{position:relative}
 .drop-btn{display:flex;align-items:center;text-align:left;overflow:hidden;white-space:nowrap}
 .drop-panel{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;
-  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 14px;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:4px 14px;
   box-shadow:var(--panel-shadow);max-height:280px;overflow:auto}
-.drop-panel .chk{padding:9px 0;border-bottom:1px solid var(--sep);margin:0}
+.drop-panel .chk{display:block;position:relative;padding:12px 30px 12px 2px;border-bottom:1px solid var(--sep);margin:0;cursor:pointer;font-size:16px}
 .drop-panel .chk:last-child{border-bottom:none}
+.drop-panel .chk input{position:absolute;opacity:0;pointer-events:none}
+.drop-panel .chk::after{content:"✓";position:absolute;right:4px;top:50%;transform:translateY(-50%);
+  font-size:17px;font-weight:600;color:var(--accent);opacity:0;transition:opacity .12s}
+.drop-panel .chk.on::after{opacity:1}
 @media(max-width:600px){main{padding:12px 12px 32px}h1{font-size:22px}th,td{padding:8px 4px;font-size:14px}}

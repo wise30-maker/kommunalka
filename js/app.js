@@ -475,12 +475,15 @@ async function renderReports() {
   app.innerHTML = '';
   app.append(el('h1', {}, 'Отчёты'));
   const now = new Date();
-  const yearInp = el('input', { type: 'number', inputmode: 'numeric', value: now.getFullYear() });
+  const curYear = now.getFullYear();
+  const yearSel = el('select', {});
+  for (let y = curYear + 1; y >= curYear - 10; y--) yearSel.append(el('option', { value: y }, String(y)));
+  yearSel.value = String(curYear);
   const monthSel = el('select', {});
   monthSel.append(el('option', { value: '' }, 'Весь год'));
   MONTHS.forEach((m, i) => monthSel.append(el('option', { value: i + 1 }, m)));
 
-  // мультивыбор объектов — выпадающий список с галочками
+  // мультивыбор объектов — выпадающий список, строки как опции iOS (✓ справа)
   const allChk = el('input', { type: 'checkbox' });
   allChk.checked = true;
   const objChks = {};
@@ -496,23 +499,27 @@ async function renderReports() {
     e.stopPropagation();
     objBox.style.display = objBox.style.display === 'block' ? 'none' : 'block';
   });
+  const pairs = [];
   for (const o of state.objects) {
     const cb = el('input', { type: 'checkbox' });
     cb.checked = true;
     objChks[o.name] = cb;
+    const lbl = el('label', { class: 'chk on' }, cb, o.name);
     cb.addEventListener('change', () => {
       if (!cb.checked) allChk.checked = false;
       else if (Object.values(objChks).every(c => c.checked)) allChk.checked = true;
+      lbl.classList.toggle('on', cb.checked);
+      allRow.classList.toggle('on', allChk.checked);
       dropLabel();
     });
-    objBox.append(el('label', { class: 'chk' }, cb, o.name));
+    pairs.push([cb, lbl]);
+    objBox.append(lbl);
   }
   allChk.addEventListener('change', () => {
-    for (const c of Object.values(objChks)) c.checked = allChk.checked;
+    for (const [c, l] of pairs) { c.checked = allChk.checked; l.classList.toggle('on', allChk.checked); }
     dropLabel();
   });
-  const allRow = el('label', { class: 'chk' }, allChk, 'Все объекты');
-  objBox.append(allRow);
+  const allRow = el('label', { class: 'chk on' }, allChk, 'Все объекты');
   objBox.insertBefore(allRow, objBox.firstChild);
   dropLabel();
 
@@ -520,7 +527,7 @@ async function renderReports() {
   const out = el('div', {});
   app.append(el('div', { class: 'card' },
     el('div', { class: 'row' },
-      el('div', {}, el('label', {}, 'Год'), yearInp),
+      el('div', {}, el('label', {}, 'Год'), yearSel),
       el('div', {}, el('label', {}, 'Период'), monthSel)),
     el('label', {}, 'Объекты'),
     el('div', { class: 'drop-wrap' }, dropBtn, objBox),
@@ -531,7 +538,7 @@ async function renderReports() {
   async function showReport() {
     out.innerHTML = '';
     try {
-      const y = parseInt(yearInp.value, 10);
+      const y = parseInt(yearSel.value, 10);
       const mFilter = monthSel.value ? parseInt(monthSel.value, 10) : null;
       const activeNames = Object.entries(objChks).filter(([, c]) => c.checked).map(([n]) => n);
       const periodName = mFilter ? `${MONTHS[mFilter - 1]} ${y}` : `${y} год`;
