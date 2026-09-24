@@ -514,23 +514,23 @@ async function renderPeriodForm(periodId) {
   const readHint = el('div', { class: 'muted', style: 'font-size:13px;margin-top:8px' });
   const avgBtn = el('button', {
     class: 'btn secondary small', type: 'button', onclick: () => {
-      const y = parseInt(year.value, 10);
       let filled = 0, skipped = 0, unchanged = 0;
       const noData = [];
       for (const row of readingInputs) {
         if (String(row.inp.value).trim() !== '') { skipped++; continue; }   // введённое не трогаем
-        const s = Readings.suggest(state.data, row.kind, row.zone, y, period?.id);
+        const s = Readings.suggest(state.data, row.kind, row.zone, period?.id);
         if (s.value === null) { noData.push(row.title); continue; }
         row.inp.value = String(s.value);
         filled++;
         if (s.unchanged) unchanged++;
+        row.note = s.average === null ? '' : `+${fmtReading(Number(s.average.toFixed(3)))} (${s.intervals} мес.)`;
       }
-      readHint.textContent = `по среднему за ${y} год заполнено: ${filled}`
+      readHint.textContent = `по среднему за последние 3 месяца заполнено: ${filled}`
         + (unchanged ? ` (без изменений — расход 0: ${unchanged})` : '')
         + (skipped ? `, пропущено (уже заполнено): ${skipped}` : '')
         + (noData.length ? `, нет данных для расчёта: ${noData.join(', ')}` : '');
     }
-  }, 'Заполнить по среднему за год');
+  }, 'Заполнить по среднему (последние 3 месяца)');
   cardRead.append(el('div', { class: 'row', style: 'margin-top:12px' }, avgBtn), readHint);
 
   const save = el('button', {

@@ -35,7 +35,7 @@ for (const obj of data) {
   for (const [kind, title] of KINDS) {
     const zones = (obj.split_water && kind.startsWith('water')) ? ['kitchen', 'bath'] : [null];
     for (const zone of zones) {
-      const s = R.suggest(periods, kind, zone, year, null);
+      const s = R.suggest(periods, kind, zone, null);
       const count = R.series(periods, kind, zone, null).length;
       const zoneName = zone === 'kitchen' ? 'кухня' : zone === 'bath' ? 'ванная' : '';
       const name = (title + (zoneName ? ' — ' + zoneName : '')).padEnd(34);
@@ -43,7 +43,7 @@ for (const obj of data) {
         console.log(`  ${name} данных мало (записей: ${count}) — предложение не строится`);
       } else {
         console.log(`  ${name} предыдущее: ${s.prev.value} (${s.prev.label || s.prev.year})`
-          + ` · средний расход: ${s.average.toFixed(3)} (по ${s.samples} разницам)`
+          + ` · средний за ${s.intervals} мес.: ${s.average.toFixed(3)}`
           + ` → предложение: ${s.value}`);
       }
     }

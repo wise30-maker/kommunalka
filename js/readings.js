@@ -30,24 +30,26 @@
     return s.length ? s[s.length - 1] : null;
   }
 
-  // средний месячный расход за год: разницы между соседними показаниями,
-  // включая переход с прошлого года на текущий. Нулевые разницы учитываются
-  // (счётчик не менялся = расход 0), убывающие игнорируются (замена/сброс счётчика).
-  function avgMonthly(periods, kind, zone, year, excludeId) {
+  // средний месячный расход по последним 3 месяцам:
+  // берём последние (3 + 1) показания → до 3 промежутков, суммарную разницу делим
+  // на число промежутков. Ноль = показания не менялись; убывание (замена/сброс) — без расчёта.
+  const WINDOW_MONTHS = 3;
+
+  function avgMonthly(periods, kind, zone, excludeId, windowMonths = WINDOW_MONTHS) {
     const s = series(periods, kind, zone, excludeId);
-    const deltas = [];
-    let prev = null, decreasing = 0;
-    for (const row of s) {
-      if (prev && (prev.year === Number(year) || row.year === Number(year))) {
-        const d = row.value - prev.value;
-        if (d >= 0) deltas.push(d);
-        else decreasing++;
-      }
-      prev = row;
-    }
-    if (!deltas.length) return null;
-    const average = deltas.reduce((sum, v) => sum + v, 0) / deltas.length;
-    return { average, samples: deltas.length, unchanged: deltas.every(d => d === 0), decreasing };
+    if (s.length < 2) return null;
+    const tail = s.slice(-(windowMonths + 1));
+    const first = tail[0], last = tail[tail.length - 1];
+    const intervals = tail.length - 1;
+    const diff = last.value - first.value;
+    return {
+      average: diff > 0 ? diff / intervals : 0,
+      intervals,
+      unchanged: diff === 0,
+      decreasing: diff < 0,
+      from: first,
+      to: last
+    };
   }
 
   // сколько знаков после запятой, чтобы предложение не было точнее, чем сами показания
@@ -57,13 +59,13 @@
     return dot === -1 ? 0 : Math.min(3, s.length - dot - 1);
   }
 
-  // предложение показания: последнее + средний расход за год
-  function suggest(periods, kind, zone, year, excludeId) {
+  // предложение показания: последнее + средний расход по последним 3 месяцам
+  function suggest(periods, kind, zone, excludeId, windowMonths) {
     const prev = previous(periods, kind, zone, excludeId);
-    const stat = avgMonthly(periods, kind, zone, year, excludeId);
-    if (!prev || !stat) return { prev, average: null, samples: 0, unchanged: false, value: null };
+    const stat = avgMonthly(periods, kind, zone, excludeId, windowMonths);
+    if (!prev || !stat) return { prev, average: null, intervals: 0, unchanged: false, value: null };
     const value = Number((prev.value + stat.average).toFixed(decimals(prev.value)));
-    return { prev, average: stat.average, samples: stat.samples, unchanged: stat.unchanged, value };
+    return { prev, average: stat.average, intervals: stat.intervals, unchanged: stat.unchanged, value };
   }
 
   root.Readings = { series, previous, avgMonthly, suggest, decimals };
