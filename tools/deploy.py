@@ -62,6 +62,10 @@ for u in uploaded:
 if skipped:
     print("  (пропущены: " + ", ".join(skipped[:8]) + (" …" if len(skipped) > 8 else "") + ")")
 
+if not uploaded:
+    print("нечего деплоить — репозиторий уже совпадает с рабочей копией")
+    sys.exit(0)
+
 tree = req("POST", f"{API}/git/trees", {"base_tree": base_sha, "tree": uploaded})
 commit = req("POST", f"{API}/git/commits",
              {"message": sys.argv[1] if len(sys.argv) > 1 else "deploy", "tree": tree["sha"], "parents": [base_sha]})
