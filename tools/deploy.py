@@ -53,14 +53,21 @@ for line in subprocess.check_output(["git", "ls-files", "-s"], text=True).splitl
 def staged_bytes(path):
     return subprocess.check_output(["git", "cat-file", "blob", f":{path}"])
 
+def raw_sha(path):
+    return subprocess.check_output(["git", "hash-object", path], text=True).strip()
+
 uploaded, skipped = [], []
 for p in files:
-    if p not in staged:
-        print("нет в индексе, пропуск:", p); continue
-    if remote_sha.get(p) == staged[p]:
+    if p in staged:
+        sha, content = staged[p], staged_bytes(p)          # канонический вид из индекса
+    elif os.path.exists(p):
+        sha, content = raw_sha(p), open(p, "rb").read()    # вне индекса (js/config.js и т.п.)
+    else:
+        print("нет файла, пропуск:", p); continue
+    if remote_sha.get(p) == sha:
         skipped.append(p); continue
     b = req("POST", f"{API}/git/blobs",
-            {"content": base64.b64encode(staged_bytes(p)).decode(), "encoding": "base64"})
+            {"content": base64.b64encode(content).decode(), "encoding": "base64"})
     uploaded.append({"path": p, "mode": "100644", "type": "blob", "sha": b["sha"]})
 
 print(f"загружено: {len(uploaded)}, без изменений: {len(skipped)}")
