@@ -390,10 +390,22 @@ async function renderObjectSettings() {
     listBox.innerHTML = '';
     items.filter(i => !removed.has(i.id)).forEach((item, idx) => {
       const titleInp = el('input', { value: item.title, oninput: () => { item.title = titleInp.value; } });
+      const matchInp = el('input', {
+        value: item.gis_match || '',
+        placeholder: 'например: Водоканал;МУП города Хабаровска',
+        oninput: () => { item.gis_match = matchInp.value; }
+      });
       const up = el('button', { class: 'link', title: 'Выше', onclick: () => { if (idx > 0) { const vis = items.filter(i => !removed.has(i.id)); const a = vis[idx], b = vis[idx - 1]; const ia = items.indexOf(a), ib = items.indexOf(b); [items[ia], items[ib]] = [items[ib], items[ia]]; refreshList(); } } }, '↑');
       const down = el('button', { class: 'link', title: 'Ниже', onclick: () => { const vis = items.filter(i => !removed.has(i.id)); if (idx < vis.length - 1) { const a = vis[idx], b = vis[idx + 1]; const ia = items.indexOf(a), ib = items.indexOf(b); [items[ia], items[ib]] = [items[ib], items[ia]]; refreshList(); } } }, '↓');
       const del = el('button', { class: 'link', style: 'color:var(--danger)', onclick: () => { removed.add(item.id); refreshList(); } }, 'удалить');
-      listBox.append(el('div', { class: 'item-row' }, titleInp, up, down, del));
+      listBox.append(
+        el('div', { class: 'item-block' },
+          el('div', { class: 'item-row' }, titleInp, up, down, del),
+          el('div', { class: 'item-row', style: 'margin-bottom:10px' },
+            el('div', { style: 'flex:1' },
+              el('label', { style: 'margin:0 0 4px' }, 'Соответствие ГИС ЖКХ (получатель в квитанции, через «;»)'),
+              matchInp)))
+      );
     });
     if (!items.filter(i => !removed.has(i.id)).length) listBox.append(el('div', { class: 'muted' }, 'Статей нет — добавьте хотя бы одну ниже.'));
   }
@@ -413,7 +425,7 @@ async function renderObjectSettings() {
   const addStd = () => {
     if (!stdSel.value) return;
     const t = ITEM_CATALOG.find(([k]) => k === stdSel.value)[1];
-    items.push({ id: null, key: stdSel.value, title: t });
+    items.push({ id: null, key: stdSel.value, title: t, gis_match: '' });
     refreshList(); refreshStd();
   };
 
@@ -423,7 +435,7 @@ async function renderObjectSettings() {
     const t = customInp.value.trim();
     if (!t) return;
     const slug = 'custom_' + Date.now().toString(36);
-    items.push({ id: null, key: slug, title: t });
+    items.push({ id: null, key: slug, title: t, gis_match: '' });
     customInp.value = '';
     refreshList(); refreshStd();
   };
@@ -446,17 +458,19 @@ async function renderObjectSettings() {
           await DB.updateObject(o.id, { name: name.value.trim(), split_water: split.checked });
           // удалённые
           for (const id of removed) await DB.deleteItem(id);
-          // переименованные / новые порядок
+          // переименованные / новые порядок / изменённое соответствие
           const visible = items.filter(i => !removed.has(i.id));
           for (let i = 0; i < visible.length; i++) {
             const it = visible[i];
+            const match = (it.gis_match || '').trim() || null;
             if (it.id) {
               const orig = state.items.find(x => x.id === it.id);
-              if (orig.title !== it.title || orig.sort_order !== i) {
-                await DB.upsertItem({ object_id: o.id, key: it.key, title: it.title, sort_order: i });
+              const origMatch = (orig.gis_match || '').trim() || null;
+              if (orig.title !== it.title || orig.sort_order !== i || origMatch !== match) {
+                await DB.upsertItem({ object_id: o.id, key: it.key, title: it.title, sort_order: i, gis_match: match });
               }
             } else {
-              await DB.upsertItem({ object_id: o.id, key: it.key, title: it.title, sort_order: i });
+              await DB.upsertItem({ object_id: o.id, key: it.key, title: it.title, sort_order: i, gis_match: match });
             }
           }
           o.name = name.value.trim(); o.split_water = split.checked;

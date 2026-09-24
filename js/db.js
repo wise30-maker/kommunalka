@@ -64,7 +64,8 @@ const DB = (() => {
     updateObject: (id, o) => rest(`/objects?id=eq.${id}`, { method: 'PATCH', body: o, prefer: 'return=representation' }),
     deletePeriod: (id) => rest(`/periods?id=eq.${id}`, { method: 'DELETE' }),
 
-    listItems: (objectId) => rest(`/payment_items?object_id=eq.${objectId}&select=*&order=sort_order`),
+    // gis_match — «Соответствие ГИС ЖКХ» (получатели платежей через «;»), используется при OCR
+    listItems: (objectId) => rest(`/payment_items?object_id=eq.${objectId}&select=id,key,title,sort_order,gis_match&order=sort_order`),
     upsertItem: (row) => rest('/payment_items?on_conflict=object_id,key', { method: 'POST', body: row, prefer: 'resolution=merge-duplicates,return=representation' }),
     deleteItem: (id) => rest(`/payment_items?id=eq.${id}`, { method: 'DELETE' }),
 
