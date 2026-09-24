@@ -1,5 +1,9 @@
-# Коммитит текущее деревео через GitHub API: содержимое деревьев + base_tree
-import os, json, urllib.request, base64, sys, subprocess
+# Деплой репозитория на GitHub через API (git push в этой сети не работает).
+# Инкрементально: blob'ы, чей git-hash уже совпадает с содержимым репозитория,
+# не загружаются повторно (важно для 7 МБ ассетов OCR в vendor/).
+# Использование: python tools/deploy.py "сообщение коммита"
+import os, json, urllib.request, base64, sys, subprocess, hashlib, re
+
 TOKEN_PATH = os.path.join(os.path.expanduser("~"), ".kommunalka-github-token")
 TOKEN = os.environ.get('GITHUB_TOKEN') or open(TOKEN_PATH, encoding='ascii').read().strip()
 REPO = "wise30-maker/kommunalka"
@@ -16,10 +20,7 @@ def req(method, url, payload=None):
     except urllib.error.HTTPError as e:
         print("HTTP", e.code, e.read()[:300]); sys.exit(1)
 
-# файлы: отслеживаемые git'ом + локальный js/config.js (в .gitignore, но нужен на сайте)
-# автоматический кэш-бастинг: ?v=<sha8 содержимого файла> в index.html —
-# любое изменение css/js само инвалидирует кэш браузера, руками бампить не нужно
-import hashlib, re
+# --- кэш-бастинг: ?v=<sha8 содержимого> в index.html (руками бампить не нужно) ---
 idx_path = "index.html"
 if os.path.exists(idx_path):
     html = open(idx_path, encoding="utf-8").read()
@@ -32,24 +33,37 @@ if os.path.exists(idx_path):
     html = re.sub(r"(css/style\.css|js/[\w.]+)\?v=[^\"']+", bump, html)
     open(idx_path, "w", encoding="utf-8", newline="\n").write(html)
 
+# --- файлы: отслеживаемые git'ом + локальный js/config.js (gitignored, но нужен на сайте) ---
 files = subprocess.check_output(["git", "ls-files"], text=True).split()
-skip_prefixes = (".hermes/",)
-files = [f for f in files if not f.startswith(skip_prefixes)]
+files = [f for f in files if not f.startswith((".hermes/",))]
 if os.path.exists("js/config.js") and "js/config.js" not in files:
     files.append("js/config.js")
-print("deploy files:", files)
 
-base = req("GET", f"{API}/git/ref/heads/main")
-base_sha = base["object"]["sha"]
+base_sha = req("GET", f"{API}/git/ref/heads/main")["object"]["sha"]
+tree_info = req("GET", f"{API}/git/trees/{base_sha}?recursive=1")
+remote_sha = {t["path"]: t["sha"] for t in tree_info.get("tree", []) if t.get("type") == "blob"}
 
-blobs = {}
+def local_git_sha(path):
+    return subprocess.check_output(["git", "hash-object", path], text=True).strip()
+
+uploaded, skipped = [], []
 for p in files:
-    b = req("POST", f"{API}/git/blobs", {"content": base64.b64encode(open(p,'rb').read()).decode(), "encoding": "base64"})
-    blobs[p] = b["sha"]
+    if not os.path.exists(p):
+        print("нет файла, пропуск:", p); continue
+    if remote_sha.get(p) == local_git_sha(p):
+        skipped.append(p); continue
+    b = req("POST", f"{API}/git/blobs",
+            {"content": base64.b64encode(open(p, "rb").read()).decode(), "encoding": "base64"})
+    uploaded.append({"path": p, "mode": "100644", "type": "blob", "sha": b["sha"]})
 
-tree = req("POST", f"{API}/git/trees", {"base_tree": base_sha, "tree": [
-    {"path": p, "mode": "100644", "type": "blob", "sha": s} for p, s in blobs.items()
-]})
-commit = req("POST", f"{API}/git/commits", {"message": sys.argv[1], "tree": tree["sha"], "parents": [base_sha]})
+print(f"загружено: {len(uploaded)}, без изменений: {len(skipped)}")
+for u in uploaded:
+    print("  +", u["path"])
+if skipped:
+    print("  (пропущены: " + ", ".join(skipped[:8]) + (" …" if len(skipped) > 8 else "") + ")")
+
+tree = req("POST", f"{API}/git/trees", {"base_tree": base_sha, "tree": uploaded})
+commit = req("POST", f"{API}/git/commits",
+             {"message": sys.argv[1] if len(sys.argv) > 1 else "deploy", "tree": tree["sha"], "parents": [base_sha]})
 req("PATCH", f"{API}/git/refs/heads/main", {"sha": commit["sha"]})
 print("deployed:", commit["sha"][:10])

@@ -1,0 +1,3 @@
+# бинарные ассеты OCR: без преобразования переводов строк
+vendor/tesseract/rus.traineddata.gz binary
+vendor/tesseract/tesseract-core.wasm.js binary
