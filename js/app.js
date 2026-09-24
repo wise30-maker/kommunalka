@@ -33,7 +33,14 @@ function el(tag, attrs = {}, ...kids) {
     else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
     else e.setAttribute(k, v);
   }
-  for (const kid of kids) e.append(kid?.nodeType ? kid : document.createTextNode(kid ?? ''));
+  // дети: узлы, строки и массивы (массивы разворачиваем — иначе получится «[object ...]»)
+  const push = k => {
+    if (k === null || k === undefined || k === false || k === true) return;
+    if (k.nodeType) { e.append(k); return; }
+    if (Array.isArray(k)) { k.forEach(push); return; }
+    e.append(document.createTextNode(String(k)));
+  };
+  kids.forEach(push);
   return e;
 }
 function fmtMoney(n) {
