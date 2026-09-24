@@ -79,6 +79,13 @@ for u in uploaded:
 if skipped:
     print("  (пропущены: " + ", ".join(skipped[:8]) + (" …" if len(skipped) > 8 else "") + ")")
 
+# удаления: файлы, которые есть в репозитории, но исчезли локально (sha: None удаляет запись)
+local_paths = set(files)
+removed = [p for p in remote_sha if p not in local_paths and not p.startswith(".hermes/")]
+if removed:
+    print("удаляю из репозитория:", ", ".join(removed))
+    uploaded.extend({"path": p, "mode": "100644", "type": "blob", "sha": None} for p in removed)
+
 if not uploaded:
     print("нечего деплоить — репозиторий уже совпадает с рабочей копией")
     sys.exit(0)
