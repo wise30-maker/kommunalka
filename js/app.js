@@ -156,6 +156,82 @@ initTheme();
   });
 })();
 
+// ---------- распознавание квитанции: локально в браузере (WASM), без LLM ----------
+const ReceiptOCR = (() => {
+  let scriptPromise = null, workerPromise = null, statusSink = null;
+  const BASE = () => new URL('vendor/tesseract/', location.href).href;
+
+  function loadEngine() {
+    if (window.Tesseract) return Promise.resolve();
+    if (!scriptPromise) {
+      scriptPromise = new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = BASE() + 'tesseract.min.js';
+        s.onload = () => res();
+        s.onerror = () => rej(new Error('не удалось загрузить движок распознавания'));
+        document.head.append(s);
+      });
+    }
+    return scriptPromise;
+  }
+
+  // предобработка: до 1600px по большей стороне, grayscale + контраст
+  function preprocess(img) {
+    const maxSide = 1600;
+    const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+    const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h);
+    const px = data.data;
+    for (let i = 0; i < px.length; i += 4) {
+      let g = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+      g = Math.max(0, Math.min(255, (g - 128) * 1.35 + 128));
+      px[i] = px[i + 1] = px[i + 2] = g;
+    }
+    ctx.putImageData(data, 0, 0);
+    return canvas;
+  }
+
+  function loadImage(file) {
+    return new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = () => rej(new Error('не удалось открыть изображение'));
+      i.src = URL.createObjectURL(file);
+    });
+  }
+
+  async function recognize(file, onStatus) {
+    statusSink = onStatus || null;
+    const say = s => { if (statusSink) statusSink(s); };
+    say('подготовка изображения…');
+    const img = await loadImage(file);
+    const canvas = preprocess(img);
+    say('загружаю движок распознавания (один раз ~10 МБ)…');
+    await loadEngine();
+    if (!workerPromise) {
+      workerPromise = Tesseract.createWorker('rus', 1, {
+        workerPath: BASE() + 'worker.min.js',
+        corePath: BASE(),                                  // воркер сам выберет -simd-lstm или -lstm
+        langPath: BASE().replace(/\/$/, ''),
+        logger: m => { if (m.status) say(m.status + ' — ' + Math.round((m.progress || 0) * 100) + '%'); }
+      }).then(async w => {
+        await w.setParameters({ tessedit_pageseg_mode: '11' });   // режим проверен на квитанциях ВЦ
+        return w;
+      });
+    }
+    const worker = await workerPromise;
+    say('распознаю текст…');
+    const { data } = await worker.recognize(canvas);
+    return data.text;
+  }
+
+  return { recognize };
+})();
+
 // ---------- auth ----------
 async function renderLogin() {
   topbar.hidden = true;
@@ -316,6 +392,97 @@ async function renderPeriodForm(periodId) {
     totalDiv.querySelector('span').textContent = fmtMoney(sum);
   }
 
+  // --- распознавание квитанции: локально, суммы раскладываются по статьям ---
+  const ocrStatus = el('div', { class: 'muted' });
+  const ocrOut = el('div', {});
+  const fileInp = el('input', { type: 'file', accept: 'image/*', style: 'display:none' });
+  const ocrBtn = el('button', { class: 'btn secondary', type: 'button', onclick: () => fileInp.click() }, '📷 С квитанции');
+
+  function buildPreview(res, text) {
+    const box = el('div', {});
+    const known = res.rows.filter(r => r.itemId).length;
+    const head = el('div', { class: 'muted', style: 'margin:10px 0' });
+    head.textContent = `документов: ${res.rows.length}, сопоставлено со статьями: ${known}`
+      + `, распознано ${fmtMoney(res.recognized)} ₽`
+      + (res.total !== null ? `, в квитанции «К оплате» ${fmtMoney(res.total)} ₽ (расхождение ${fmtMoney(res.diff)} ₽)` : ', итог «К оплате» в тексте не найден');
+    box.append(head);
+
+    const table = el('table');
+    table.append(el('tr', {}, el('th', {}, 'Получатель'), el('th', {}, 'Статья'), el('th', {}, 'Сумма')));
+    const rowsState = [];
+    res.rows.forEach(r => {
+      const sel = el('select', {});
+      sel.append(el('option', { value: '' }, '— не выбрано —'));
+      state.items.forEach(it => {
+        const opt = el('option', { value: it.id }, it.title);
+        if (it.id === r.itemId) opt.selected = true;
+        sel.append(opt);
+      });
+      const value = r.suspicious ? (r.suggested ?? '') : r.amount;
+      const amt = el('input', { type: 'number', inputmode: 'decimal', step: '0.01', value: value === '' ? '' : String(value) });
+      const payeeCell = el('td', {}, r.payee || '—');
+      if (r.suspicious) payeeCell.append(el('div', { class: 'muted', style: 'font-size:12px' }, 'сумма распознана без копеек — проверьте'));
+      table.append(el('tr', {}, payeeCell, el('td', {}, sel), el('td', {}, amt)));
+      rowsState.push({ sel, amt });
+    });
+    box.append(table);
+
+    if (res.problems.length) {
+      const list = el('div', { class: 'muted', style: 'margin-top:8px;font-size:13px' });
+      res.problems.forEach(p => list.append(el('div', {}, '• ' + p.text)));
+      box.append(list);
+    }
+
+    box.append(el('details', { style: 'margin-top:8px' },
+      el('summary', { class: 'muted', style: 'font-size:13px' }, 'показать распознанный текст'),
+      el('pre', { style: 'white-space:pre-wrap;font-size:12px' }, text.trim())));
+
+    const apply = el('button', {
+      class: 'btn', type: 'button', onclick: () => {
+        const sums = {};
+        rowsState.forEach(({ sel, amt }) => {
+          const id = sel.value;
+          if (!id) return;
+          const v = parseFloat(String(amt.value).replace(',', '.'));
+          if (isNaN(v)) return;
+          sums[id] = (sums[id] || 0) + v;
+        });
+        let applied = 0;
+        for (const [id, v] of Object.entries(sums)) {
+          if (itemInputs[id]) { itemInputs[id].value = v.toFixed(2); applied++; }
+        }
+        updateTotal();
+        ocrOut.innerHTML = '';
+        ocrStatus.textContent = `применено статей: ${applied} — проверьте суммы и нажмите «Сохранить»`;
+      }
+    }, 'Применить');
+    const cancel = el('button', {
+      class: 'btn secondary', type: 'button',
+      onclick: () => { ocrOut.innerHTML = ''; ocrStatus.textContent = 'распознавание отменено'; }
+    }, 'Отмена');
+    box.append(el('div', { class: 'row', style: 'margin-top:10px' }, apply, cancel));
+    return box;
+  }
+
+  fileInp.addEventListener('change', async () => {
+    const f = fileInp.files && fileInp.files[0];
+    if (!f) return;
+    ocrOut.innerHTML = '';
+    try {
+      const text = await ReceiptOCR.recognize(f, s => { ocrStatus.textContent = s; });
+      const res = ReceiptParse.parse(text, state.items);
+      ocrOut.append(buildPreview(res, text));
+      ocrStatus.textContent = res.rows.length ? 'готово — проверьте сопоставление' : 'суммы в тексте не найдены';
+    } catch (err) {
+      ocrStatus.textContent = 'ОШИБКА: ' + (err && err.message ? err.message : err);
+    } finally {
+      fileInp.value = '';
+    }
+  });
+
+  const cardOcr = el('div', { class: 'card' }, el('h2', {}, 'Распознать квитанцию'),
+    el('div', { class: 'row' }, ocrBtn), fileInp, ocrStatus, ocrOut);
+
   const cardRead = el('div', { class: 'card' }, el('h2', {}, 'Показания счётчиков'));
   const readingInputs = [];
   const zones = o.split_water ? [['kitchen', 'Кухня'], ['bath', 'Ванная']] : [[null, '']];
@@ -359,7 +526,7 @@ async function renderPeriodForm(periodId) {
         el('div', {}, el('label', {}, 'Год'), year),
         el('div', { style: 'flex:2' }, el('label', {}, 'Период'), label)),
       sugg),
-    cardItems, totalDiv, cardRead,
+    cardOcr, cardItems, totalDiv, cardRead,
     el('div', { style: 'margin:14px 0' }, save)
   );
   updateTotal();
