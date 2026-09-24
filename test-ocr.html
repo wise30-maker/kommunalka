@@ -54,11 +54,14 @@ function preprocess(img) {
 
 async function ensureWorker() {
   if (worker) return worker;
-  statusEl.textContent = 'загружаю движок OCR (~5 МБ, только в первый раз)…';
+  // абсолютный базовый URL: внутри воркера относительные пути разрешаются от его файла,
+  // поэтому 'vendor/tesseract/...' превращался бы в 'vendor/tesseract/vendor/tesseract/...'
+  const BASE = new URL('vendor/tesseract/', location.href).href;
+  statusEl.textContent = 'загружаю движок OCR (~10 МБ, только в первый раз)…';
   worker = await Tesseract.createWorker('rus', 1, {
-    workerPath: 'vendor/tesseract/worker.min.js',
-    corePath: 'vendor/tesseract/',
-    langPath: 'vendor/tesseract',
+    workerPath: BASE + 'worker.min.js',
+    corePath: BASE,                      // воркер сам выберет -simd-lstm или -lstm
+    langPath: BASE.replace(/\/$/, ''),
     logger: m => { if (m.status) statusEl.textContent = m.status + ' — ' + Math.round((m.progress || 0) * 100) + '%'; }
   });
   // PSM 11 (разрозненный текст) — проверено на скриншоте квитанции: все суммы и итог
@@ -86,7 +89,8 @@ document.getElementById('file').addEventListener('change', async (e) => {
     textEl.textContent = data.text.trim() || '(текст не распознан)';
     statusEl.textContent = 'готово за ' + secs + ' с; строк: ' + (data.text.trim().split('\n').length);
   } catch (err) {
-    statusEl.textContent = 'ОШИБКА: ' + (err && err.message ? err.message : err);
+    statusEl.textContent = 'ОШИБКА: ' + (err && err.message ? err.message : err)
+      + ' | пути: ' + new URL('vendor/tesseract/', location.href).href;
     console.error(err);
   }
 });
