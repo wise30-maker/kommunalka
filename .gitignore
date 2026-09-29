@@ -1,0 +1,9 @@
+js/config.js
+*.local
+node_modules/
+.DS_Store
+rus.traineddata
+/rus_*.gz
+migrate/data.json
+migrate/data.xlsx
+migrate/ocr_sample_*.txt
