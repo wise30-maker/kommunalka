@@ -1,0 +1,38 @@
+name: supabase-keepalive
+
+# Keep-alive проекта Supabase «Коммуналка».
+#
+# Зачем: free tier Supabase усыпляет проект после ~7 дней без запросов. У усыплённого
+# проекта исчезает DNS-запись (NXDOMAIN), поэтому сайт показывает «Failed to fetch»
+# ещё до отправки логина. Любой запрос к API считается активностью и сбрасывает таймер.
+#
+# Сбой этого job'а = GitHub пришлёт письмо владельцу репозитория. Если GitHub сам
+# отключит расписание (после 60 дней без коммитов) — тоже придёт письмо, и расписание
+# возвращается кнопкой «Enable workflow» на вкладке Actions.
+#
+# Секретов не требует: apikey не нужен, 401 на запрос без ключа тоже означает,
+# что сервер отвечает.
+
+on:
+  schedule:
+    - cron: '0 4 */2 * *' # каждые 2 дня, 04:00 UTC (14:00 по Владивостоку)
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Пинг Supabase API
+        run: |
+          url="https://jtooyjofbosgspeonaza.supabase.co/auth/v1/health"
+          code=$(curl -s -o /tmp/body -w '%{http_code}' --max-time 20 "$url" || echo 000)
+          echo "HTTP $code"
+          if [ "$code" = "200" ] || [ "$code" = "401" ]; then
+            echo "Supabase отвечает — проект активен"
+            exit 0
+          fi
+          echo "::error::Проект Supabase не отвечает (HTTP $code) — похоже, усыплён после 7 дней без запросов. Разбудить: https://supabase.com/dashboard/project/jtooyjofbosgspeonaza"
+          exit 1

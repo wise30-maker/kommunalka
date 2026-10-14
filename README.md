@@ -118,6 +118,36 @@ node tools/readings_test.js 2026 "Фурманова 193"
 Если системное меню недоступно (например, браузер на ПК), текст копируется в буфер обмена,
 а картинка скачивается в загрузки.
 
+## Доступность (пауза Supabase на free tier)
+
+Симптом: сайт открывается, но сразу показывает **«Failed to fetch»** — до отправки логина.
+Это не ошибка фронтенда и не сломанный деплой: бесплатный тариф Supabase усыпляет проект
+после ~7 дней без запросов, и у усыплённого проекта **пропадает DNS-запись** (NXDOMAIN),
+поэтому браузер не может даже установить соединение. Проверка «фронтенд или бэкенд»:
+
+```
+curl -s -o /dev/null -w '%{http_code}\n' https://wise30-maker.github.io/kommunalka/   # 200 → Pages жив
+nslookup jtooyjofbosgspeonaza.supabase.co                                             # NXDOMAIN → проект спит
+curl -s -H "Authorization: Bearer $(cat ~/.kommunalka-supabase-token)" \
+  https://api.supabase.com/v1/projects/jtooyjofbosgspeonaza                           # status: INACTIVE
+```
+
+Разбудить: `POST https://api.supabase.com/v1/projects/jtooyjofbosgspeonaza/restore`
+(тем же PAT) либо кнопкой Restore в дашборде — https://supabase.com/dashboard/project/jtooyjofbosgspeonaza .
+Поднимается за минуту-две; `ref` и ключи не меняются, деплой сайта не нужен.
+
+Чтобы проект не засыпал, стоит две независимые «пинговалки» (запрос к API = активность):
+
+1. **GitHub Actions** — `.github/workflows/supabase-keepalive.yml`, каждые 2 дня в облаке.
+   Сбой job'а и отключение расписания GitHub'ом приходят письмом владельцу репозитория.
+2. **Локальный планировщик Hermes** — `~/AppData/Local/hermes/scripts/kommunalka-keepalive.py`
+   (задание `kommunalka-supabase-keepalive`, ежедневно 9:00): пингует API, а если проект всё же
+   уснул — сам вызывает `restore` и ждёт `ACTIVE_HEALTHY`. Молчит, когда всё хорошо; пишет отчёт
+   только при проблеме. Работает лишь при запущенном Hermes (нужен `hermes gateway`).
+
+Проверить сам скрипт: `python ~/AppData/Local/hermes/scripts/kommunalka-keepalive.py`
+(пустой вывод = проект жив) и `--simulate-fail` (прогон ветки сбоя).
+
 ## Токены
 
 Файлы `js/config.js` и любые токены НЕ коммитятся (см. `.gitignore`).
