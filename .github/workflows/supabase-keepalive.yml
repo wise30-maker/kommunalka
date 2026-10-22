@@ -2,16 +2,23 @@ name: supabase-keepalive
 
 # Keep-alive проекта Supabase «Коммуналка».
 #
-# Зачем: free tier Supabase усыпляет проект после ~7 дней без запросов. У усыплённого
-# проекта исчезает DNS-запись (NXDOMAIN), поэтому сайт показывает «Failed to fetch»
-# ещё до отправки логина. Любой запрос к API считается активностью и сбрасывает таймер.
+# Зачем: free tier Supabase гасит проект после ~7 дней без активности БАЗЫ. У
+# усыплённого проекта исчезает DNS-запись (NXDOMAIN), и сайт показывает
+# «Failed to fetch» ещё до отправки логина.
 #
-# Сбой этого job'а = GitHub пришлёт письмо владельцу репозитория. Если GitHub сам
-# отключит расписание (после 60 дней без коммитов) — тоже придёт письмо, и расписание
-# возвращается кнопкой «Enable workflow» на вкладке Actions.
+# ВАЖНО (проверено на практике 2026-10-22): пинг GoTrue (/auth/v1/health) НЕ
+# продлевает жизнь проекту. Без apikey Kong отвечает 401 на входе, до Postgres
+# запрос не доходит — оба keep-alive'а рапортовали «жив», а база всё равно
+# уснула. Поэтому пингуем REST PostgREST с anon-ключом: он реально исполняется
+# в базе (ответ 200 `[]` — RLS режет строки, но запрос дошёл до Postgres).
 #
-# Секретов не требует: apikey не нужен, 401 на запрос без ключа тоже означает,
-# что сервер отвечает.
+# anon-ключ здесь в открытом виде осознанно: он и так публикуется на сайте
+# (js/config.js). Доступ к данным закрыт RLS-политиками, а не секретностью ключа.
+# Ключ совпадает с js/config.js — при ротации ключей обновить оба места.
+#
+# Сбой job'а = GitHub пришлёт письмо владельцу репозитория. Если GitHub сам
+# отключит расписание (после 60 дней без коммитов) — тоже придёт письмо,
+# расписание возвращается кнопкой «Enable workflow» на вкладке Actions.
 
 on:
   schedule:
@@ -20,19 +27,31 @@ on:
 
 permissions: {}
 
+env:
+  SUPABASE_URL: https://jtooyjofbosgspeonaza.supabase.co
+  SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0b295am9mYm9zZ3NwZW9uYXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxNjAxMjksImV4cCI6MjEwNTczNjEyOX0.l7dTqVQlLtTFJBLO_NqZyh-i5MdrrF1vzm35JBHMB6Q
+
 jobs:
   ping:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Пинг Supabase API
+      - name: Пинг базы через PostgREST (реальная активность БД)
         run: |
-          url="https://jtooyjofbosgspeonaza.supabase.co/auth/v1/health"
-          code=$(curl -s -o /tmp/body -w '%{http_code}' --max-time 20 "$url" || echo 000)
-          echo "HTTP $code"
-          if [ "$code" = "200" ] || [ "$code" = "401" ]; then
-            echo "Supabase отвечает — проект активен"
+          url="$SUPABASE_URL/rest/v1/objects?select=id&limit=1"
+          code=$(curl -s -o /tmp/body -w '%{http_code}' --max-time 20 \
+            -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$url" || echo 000)
+          echo "PostgREST HTTP $code"
+          echo "body: $(head -c 200 /tmp/body)"
+          if [ "$code" = "200" ]; then
+            echo "База отвечает — проект активен"
             exit 0
           fi
-          echo "::error::Проект Supabase не отвечает (HTTP $code) — похоже, усыплён после 7 дней без запросов. Разбудить: https://supabase.com/dashboard/project/jtooyjofbosgspeonaza"
+
+          # Диагностика: GoTrue отвечает и без ключа, поэтому 401 здесь означает
+          # «Kong жив, а база не отвечает» — то есть проект усыплён, а не лежит сеть.
+          hcode=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$SUPABASE_URL/auth/v1/health" || echo 000)
+          echo "GoTrue HTTP $hcode"
+          echo "::error::База Supabase не отвечает (REST HTTP $code, GoTrue HTTP $hcode) — проект усыплён после 7 дней без активности базы. Разбудить: https://supabase.com/dashboard/project/jtooyjofbosgspeonaza"
           exit 1
