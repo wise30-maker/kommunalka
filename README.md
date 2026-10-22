@@ -136,14 +136,29 @@ curl -s -H "Authorization: Bearer $(cat ~/.kommunalka-supabase-token)" \
 (тем же PAT) либо кнопкой Restore в дашборде — https://supabase.com/dashboard/project/jtooyjofbosgspeonaza .
 Поднимается за минуту-две; `ref` и ключи не меняются, деплой сайта не нужен.
 
-Чтобы проект не засыпал, стоит две независимые «пинговалки» (запрос к API = активность):
+Чтобы проект не засыпал, работают две независимые «пинговалки» — обе бьют **в базу**
+(PostgREST), а не в health:
 
 1. **GitHub Actions** — `.github/workflows/supabase-keepalive.yml`, каждые 2 дня в облаке.
    Сбой job'а и отключение расписания GitHub'ом приходят письмом владельцу репозитория.
 2. **Локальный планировщик Hermes** — `~/AppData/Local/hermes/scripts/kommunalka-keepalive.py`
-   (задание `kommunalka-supabase-keepalive`, ежедневно 9:00): пингует API, а если проект всё же
+   (задание `kommunalka-supabase-keepalive`, ежедневно 9:00): пингует базу, а если проект всё же
    уснул — сам вызывает `restore` и ждёт `ACTIVE_HEALTHY`. Молчит, когда всё хорошо; пишет отчёт
    только при проблеме. Работает лишь при запущенном Hermes (нужен `hermes gateway`).
+
+**Важно (проверено 2026-10-22).** Пинг `GET /auth/v1/health` keep-alive НЕ даёт: без `apikey`
+Kong отвечает 401 ещё на входе, запрос не доходит до Postgres и активностью базы не считается.
+23 сентября – 22 октября обе «пинговалки» рапортовали «жив», а база всё равно уснула. Рабочий
+пинг — REST-запрос с anon-ключом, он реально исполняется в базе:
+
+```
+curl -s -o /dev/null -w '%{http_code}\n' -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+  "https://jtooyjofbosgspeonaza.supabase.co/rest/v1/objects?select=id&limit=1"   # 200 → база жива
+```
+
+`200` с телом `[]` — норма (RLS режет строки без логина, но запрос дошёл до Postgres).
+anon-ключ берётся из `js/config.js`; в workflow он лежит открытым текстом осознанно — он и так
+публикуется на сайте, доступ закрыт RLS. При ротации ключей обновить оба места.
 
 Проверить сам скрипт: `python ~/AppData/Local/hermes/scripts/kommunalka-keepalive.py`
 (пустой вывод = проект жив) и `--simulate-fail` (прогон ветки сбоя).
