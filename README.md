@@ -144,7 +144,17 @@ curl -s -H "Authorization: Bearer $(cat ~/.kommunalka-supabase-token)" \
 2. **Локальный планировщик Hermes** — `~/AppData/Local/hermes/scripts/kommunalka-keepalive.py`
    (задание `kommunalka-supabase-keepalive`, ежедневно 9:00): пингует базу, а если проект всё же
    уснул — сам вызывает `restore` и ждёт `ACTIVE_HEALTHY`. Молчит, когда всё хорошо; пишет отчёт
-   только при проблеме. Работает лишь при запущенном Hermes (нужен `hermes gateway`).
+   только при проблеме. Работает лишь при запущенном Hermes.
+
+   Автозапуск gateway настроен (2026-10-26): `hermes gateway install --start-now --start-on-login`.
+   Задача в Планировщике Windows не создалась — UAC на этой учётке недоступен (ShellExecuteW=5),
+   Hermes сам ушёл в fallback: ярлык автозагрузки
+   `…\Start Menu\Programs\Startup\Hermes_Gateway.vbs` (запускает
+   `…\Local\hermes\gateway-service\Hermes_Gateway.cmd` без окна). Проверка — `hermes gateway status`
+   (должно быть `✓ Gateway process running`), в `logs\gateway.log` строка
+   `Cron scheduler will tick 1 profile(s)`. Если после правки скрипта задания «молчат» —
+   сначала смотреть этот статус: без gateway тикер не работает, хотя само задание и
+   `last_status: ok` остаются на месте.
 
 **Важно (проверено 2026-10-22).** Пинг `GET /auth/v1/health` keep-alive НЕ даёт: без `apikey`
 Kong отвечает 401 ещё на входе, запрос не доходит до Postgres и активностью базы не считается.
