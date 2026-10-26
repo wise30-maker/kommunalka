@@ -142,7 +142,7 @@ curl -s -H "Authorization: Bearer $(cat ~/.kommunalka-supabase-token)" \
 1. **GitHub Actions** — `.github/workflows/supabase-keepalive.yml`, каждые 2 дня в облаке.
    Сбой job'а и отключение расписания GitHub'ом приходят письмом владельцу репозитория.
 2. **Локальный планировщик Hermes** — `~/AppData/Local/hermes/scripts/kommunalka-keepalive.py`
-   (задание `kommunalka-supabase-keepalive`, ежедневно 9:00): пингует базу, а если проект всё же
+   (задание `kommunalka-supabase-keepalive`, ежедневно 10:30): пингует базу, а если проект всё же
    уснул — сам вызывает `restore` и ждёт `ACTIVE_HEALTHY`. Молчит, когда всё хорошо; пишет отчёт
    только при проблеме. Работает лишь при запущенном Hermes.
 
